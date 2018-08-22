@@ -13,7 +13,7 @@ from datetime import datetime
 import base64
 
 server = Flask("myserver")
-app = dash.Dash(server=server)
+application = app = dash.Dash(server=server)
 
 IMAGE_FOLDER = os.path.join('static', 'ComingSoon')
 
