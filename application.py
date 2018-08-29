@@ -12,8 +12,11 @@ import pandas_datareader.data as web
 from datetime import datetime
 import base64
 
-server = Flask("myserver")
-application = app = dash.Dash(server=server)
+# application = server = Flask("myserver")
+# app = dash.Dash(server=server)
+
+app = dash.Dash(__name__)
+application = app.server
 
 IMAGE_FOLDER = os.path.join('static', 'ComingSoon')
 
