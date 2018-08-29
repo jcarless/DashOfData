@@ -18,6 +18,7 @@ import base64
 app = dash.Dash(__name__)
 application = app.server
 
+
 IMAGE_FOLDER = os.path.join('static', 'ComingSoon')
 
 image_filename = './static/ComingSoon/ComingSoon.png'
