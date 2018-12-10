@@ -1,9 +1,11 @@
-from alpha_vantage.sectorperformance import SectorPerformances
+from alpha_vantage.timeseries import TimeSeries
 import matplotlib.pyplot as plt
 
-sp = SectorPerformances(key='7WPQAG2NRC8PLFIZ', output_format='pandas')
-data, meta_data = sp.get_sector()
-print(data['Rank D: Month Performance']["Consumer Discretionary"]) # 1 month
-print(data['Rank E: Month Performance']["Consumer Discretionary"]) # 3 month
-print(data['Rank F: Year-to-Date (YTD) Performance']["Consumer Discretionary"]) # ytd
-print(data['Rank G: Year Performance']["Consumer Discretionary"]) # 1 year
+ts = TimeSeries(key='7WPQAG2NRC8PLFIZ', output_format='pandas')
+# data, meta_data = ts.get_daily(symbol='NRN', outputsize='full')
+data, meta_data = ts.get_daily(symbol='XLY', outputsize='full')
+
+print(data.tail(5))
+data['4. close'].plot()
+plt.title('Intraday Times Series for the MSFT stock (1 min)')
+plt.show()
