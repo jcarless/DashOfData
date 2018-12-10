@@ -89,6 +89,19 @@ itemSchema = """
                 )
             """
 
+indiciesSchema = """
+            CREATE TABLE indicies (
+                    timestamp TIMESTAMP PRIMARY KEY,
+                    index_name TEXT,
+                    symbol TEXT NOT NULL,
+                    open NUMERIC,
+                    high NUMERIC,
+                    low NUMERIC,
+                    close NUMERIC,
+                    volume NUMERIC
+                )
+            """
+
 course_check_id_index = "CREATE INDEX courses_check_fkey ON courses (check_id)"
 item_check_id_index = "CREATE INDEX items_check_fkey ON items (check_id)"
 item_course_id_index = "CREATE INDEX items_course_fkey ON items (course_id)"
@@ -106,12 +119,13 @@ def create_schema():
         # f"{course_type_enum}",
         # f"{vc_enum}",
         # f"{vc_reason_enum}",
-        f"{checkSchema}",
-        f"{courseSchema}",
-        f"{itemSchema}",
-        f"{course_check_id_index}",
-        f"{item_check_id_index}",
-        f"{item_course_id_index}"
+        # f"{checkSchema}",
+        # f"{courseSchema}",
+        # f"{itemSchema}",
+        f"{indiciesSchema}",
+        # f"{course_check_id_index}",
+        # f"{item_check_id_index}",
+        # f"{item_course_id_index}"
         )
 
     conn = None
