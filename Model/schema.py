@@ -2,14 +2,15 @@ import psycopg2
 from config import config
 
 # Enums
-check_type_enum = "CREATE TYPE check_type_enum AS ENUM ('table', 'tab')"
+condition_main_enum = "CREATE TYPE condition_main_enum AS ENUM ('clear', 'clouds', 'mist', 'haze', 'fog', 'smoke', 'dust', 'sand', 'drizzle', 'rain', 'squall', 'snow', 'thunderstorm', 'extreme')"
+check_type_enum = "CREATE TYPE check_type_enum AS ENUM ('table', 'tab', 'takeout')"
 status_enum = "CREATE TYPE status_enum AS ENUM ('open', 'closed')"
 tax_type_enum = "CREATE TYPE tax_type_enum AS ENUM ('exclusive', 'inclusive')"
 day_enum = "CREATE TYPE day_enum AS ENUM ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')"
 day_of_week_enum = "CREATE TYPE day_of_week_enum AS ENUM ('0','1','2','3','4','5','6')"
 month_enum = """CREATE TYPE month_enum AS ENUM (
             'january', 
-            'feburary', 
+            'february', 
             'march', 
             'april', 
             'may', 
@@ -47,10 +48,10 @@ vc_reason_enum = """CREATE TYPE vc_reason_enum AS ENUM (
 
 checkSchema = """
             CREATE TABLE checks (
-                check_id INTEGER PRIMARY KEY, 
+                check_id serial PRIMARY KEY, 
                 check_type check_type_enum, 
                 guests INTEGER NOT NULL,
-                seated TIMESTAMP,
+                timestamp TIMESTAMP,
                 server TEXT,
                 status status_enum,
                 tax_type tax_type_enum,
@@ -64,7 +65,7 @@ checkSchema = """
 
 courseSchema = """
             CREATE TABLE courses (
-                    course_id INTEGER PRIMARY KEY,
+                    course_id serial PRIMARY KEY,
                     course_type course_type_enum,
                     total NUMERIC NOT NULL,
                     check_id INTEGER NOT NULL,
@@ -74,7 +75,7 @@ courseSchema = """
 
 itemSchema = """
             CREATE TABLE items (
-                    item_id INTEGER PRIMARY KEY,
+                    item_id serial PRIMARY KEY,
                     item TEXT,
                     gross NUMERIC NOT NULL,
                     tax NUMERIC,
@@ -89,9 +90,10 @@ itemSchema = """
                 )
             """
 
-indiciesSchema = """
-            CREATE TABLE indicies (
-                    timestamp TIMESTAMP PRIMARY KEY,
+quotesSchema = """
+            CREATE TABLE quotes (
+                    quote_id serial PRIMARY KEY,
+                    timestamp TIMESTAMP,
                     index_name TEXT,
                     symbol TEXT NOT NULL,
                     open NUMERIC,
@@ -102,30 +104,71 @@ indiciesSchema = """
                 )
             """
 
+weatherSchema = """
+CREATE TABLE weather (
+    weather_id serial PRIMARY KEY,
+    timestamp TIMESTAMP,
+    temp NUMERIC NOT NULL,
+    high_temp NUMERIC,
+    low_temp NUMERIC,
+    humidity INTEGER,
+    wind_speed INTEGER,
+    wind_direction INTEGER,
+    pressure INTEGER,
+    weather_severity INTEGER NOT NULL,
+    condition_main condition_main_enum NOT NULL,
+    condition_detail TEXT,
+    weather_code INTEGER,
+    city_id INTEGER,
+    city TEXT,
+    region TEXT,
+    country TEXT
+    )
+"""
+
 course_check_id_index = "CREATE INDEX courses_check_fkey ON courses (check_id)"
 item_check_id_index = "CREATE INDEX items_check_fkey ON items (check_id)"
 item_course_id_index = "CREATE INDEX items_course_fkey ON items (course_id)"
 
-
 def create_schema():
     commands = (
         "CREATE SCHEMA IF NOT EXISTS dod",
-        # f"{check_type_enum}",
-        # f"{status_enum}",
-        # f"{tax_type_enum}",
-        # f"{day_enum}",
-        # f"{day_of_week_enum}",
-        # f"{month_enum}",
-        # f"{course_type_enum}",
-        # f"{vc_enum}",
-        # f"{vc_reason_enum}",
-        # f"{checkSchema}",
-        # f"{courseSchema}",
-        # f"{itemSchema}",
-        f"{indiciesSchema}",
-        # f"{course_check_id_index}",
-        # f"{item_check_id_index}",
-        # f"{item_course_id_index}"
+
+        # "DROP TABLE weather",
+        # "DROP TABLE quotes",
+        # "DROP TYPE condition_main_enum",
+        # f"{condition_main_enum}",
+        # f"{weatherSchema}",
+        # f"{quotesSchema}",
+
+        #POS DATA
+        "DROP TABLE items",
+        "DROP TABLE courses",
+        "DROP TABLE checks",
+        "DROP TYPE status_enum",
+        "DROP TYPE tax_type_enum",
+        "DROP TYPE day_enum",
+        "DROP TYPE day_of_week_enum",
+        "DROP TYPE month_enum",
+        "DROP TYPE course_type_enum",
+        "DROP TYPE vc_enum",
+        "DROP TYPE vc_reason_enum",
+        "DROP TYPE check_type_enum",
+        f"{status_enum}",
+        f"{tax_type_enum}",
+        f"{day_enum}",
+        f"{day_of_week_enum}",
+        f"{month_enum}",
+        f"{course_type_enum}",
+        f"{vc_enum}",
+        f"{vc_reason_enum}",
+        f"{check_type_enum}",
+        f"{checkSchema}",
+        f"{courseSchema}",
+        f"{itemSchema}",
+        f"{course_check_id_index}",
+        f"{item_check_id_index}",
+        f"{item_course_id_index}"
         )
 
     conn = None
