@@ -23,6 +23,7 @@ def get_daily_timeseries():
         SUM("public"."checks"."guests") AS "guests",
         COUNT(distinct "public"."checks"."check_id") AS "check_count",
         ROUND(AVG(distinct "public"."weather"."temp"), 2) AS "temp",
+        ROUND(MAX(distinct "public"."weather"."high_temp"), 2) AS "high_temp",
         CEILING(AVG(distinct "public"."weather"."humidity")) AS "humidity",
         CEILING(AVG(distinct "public"."weather"."weather_severity")) AS "severity"
         
@@ -30,9 +31,8 @@ def get_daily_timeseries():
         
         RIGHT JOIN "public"."weather" 
         ON DATE("public"."weather"."timestamp") = DATE("public"."checks"."timestamp")
-        AND EXTRACT(HOUR FROM "public"."weather"."timestamp") = EXTRACT(HOUR FROM "public"."checks"."timestamp")
         
-        WHERE DATE("public"."weather"."timestamp") BETWEEN '2014-2-1' AND '2015-9-30'
+        WHERE DATE("public"."weather"."timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
         
         GROUP BY DATE("public"."weather"."timestamp")
         ORDER BY "date" ASC
@@ -55,6 +55,7 @@ posData = pandas.DataFrame(get_daily_timeseries(),
                                  "guests",
                                  "check_count",
                                  "temp",
+                                 "high_temp",
                                  "humidity",
                                  "severity"
                                  ])
@@ -63,24 +64,31 @@ posData = pandas.DataFrame(get_daily_timeseries(),
 posData[~posData.isin([np.nan, np.inf, -np.inf]).any(1)]
 posData.mask(posData.eq('None')).dropna()
 
-
 posData["guests"] = posData["guests"].fillna(0)
 posData["total_sales"] = posData["total_sales"].fillna(0)
 posData["humidity"] = posData["humidity"].fillna(0)
 posData["severity"] = posData["severity"].fillna(0)
 posData["temp"] = posData["temp"].fillna(0)
-
+posData["high_temp"] = posData["temp"].fillna(0)
 
 posData.total_sales = posData.total_sales.astype(int)
 posData.temp = posData.temp.astype(int)
 posData.humidity = posData.humidity.astype(int)
 posData.severity = posData.severity.astype(int)
+posData.high_temp = posData.high_temp.astype(int)
+
 
 posData["guests"] = posData["guests"].mask(posData["guests"] == 0, 0.0001)
 
 posData['date'] = pandas.to_datetime(posData['date'])
 posData.index = posData['date']
 posData.drop('date',axis=1,inplace=True)
+#posData = posData.asfreq(freq='d')
+
+missingDates = pandas.date_range(start = '2014-3-31', end = '2015-9-30' ).difference(posData.index)
+
+if len(missingDates) > 0:
+    raise Exception(f"{len(missingDates)} Dates are missing from the timeseries: \n{missingDates}")
 
 
 #End the session

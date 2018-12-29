@@ -1,5 +1,5 @@
 import posData_preprocessing
-import indicies_preprocessing
+import indicies_preprocessing as ind
 posData = posData_preprocessing.posData
 
 cols = [
@@ -11,11 +11,30 @@ cols = [
         "severity"
         ]
            
-print("Number of indicies: ", len(indicies_preprocessing.indicies))
-
 #divide into train and test set
 train = posData[:int(0.7*(len(posData)))]
 test = posData[int(0.7*(len(posData))):]
+
+IYK_train = ind.IYK[:int(0.7*(len(ind.IYK)))]
+IYK_test = ind.IYK[int(0.7*(len(ind.IYK))):]
+
+RHS_train = ind.RHS[:int(0.7*(len(ind.RHS)))]
+RHS_test = ind.RHS[int(0.7*(len(ind.RHS))):]
+
+FSTA_train = ind.FSTA[:int(0.7*(len(ind.FSTA)))]
+FSTA_test = ind.FSTA[int(0.7*(len(ind.FSTA))):]
+
+VDC_train = ind.VDC[:int(0.7*(len(ind.VDC)))]
+VDC_test = ind.VDC[int(0.7*(len(ind.VDC))):]
+
+PBJ_train = ind.PBJ[:int(0.7*(len(ind.PBJ)))]
+PBJ_test = ind.PBJ[int(0.7*(len(ind.PBJ))):]
+
+XLY_train = ind.XLY[:int(0.7*(len(ind.XLY)))]
+XLY_test = ind.XLY[int(0.7*(len(ind.XLY))):]
+
+FXG_train = ind.FXG[:int(0.7*(len(ind.FXG)))]
+FXG_test = ind.FXG[int(0.7*(len(ind.FXG))):]
 
 #train.drop('date',axis=1,inplace=True)
 #train.drop('total_sales',axis=1,inplace=True)

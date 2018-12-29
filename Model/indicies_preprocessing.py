@@ -22,46 +22,43 @@ def get_indicies():
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'IYK'
+           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
            """,
            """
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'RHS'
+           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
            """,
            """
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'FSTA'
+           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
            """,
            """
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'VDC'
-           """,
-           """
-           SELECT "timestamp", "index_name", "symbol", "close" 
-           FROM "public"."quotes" 
-           WHERE "symbol" = 'FTXG'
-           """,
-           """
-           SELECT "timestamp", "index_name", "symbol", "close" 
-           FROM "public"."quotes" 
-           WHERE "symbol" = 'ORG'
+           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
            """,
            """
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'PBJ'
+           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
            """,
            """
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'XLY'
+           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
            """,
            """
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'FXG'
+           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
            """
           ]
            
@@ -90,18 +87,29 @@ for index in get_indicies():
                                     "symbol",
                                     "close"
                                     ])
+       
+   df['close'] = df['close'].astype(int)
+   df['date'] = pandas.to_datetime(df['date'])
+   df.index = df['date']
+   df.drop('date',axis=1,inplace=True)
    
+   df = df.asfreq(freq='d',method='backfill')
+   
+   missingDates = pandas.date_range(start = '2014-3-31', end = '2015-9-30' ).difference(df.index)
+
+   if len(missingDates) > 0:
+       raise Exception(f"{len(missingDates)} Dates are missing from the timeseries: \n{missingDates}")
+
    indicies.append(df)
 
-IYK = indicies[0]
-RHS = indicies[1]
-FSTA = indicies[2]
-VDC = indicies[3]
-FTXG = indicies[4]
-ORG = indicies[5]
-PBJ = indicies[6]
-XLY = indicies[7]
-FXG = indicies[8]  
+IYK = indicies[0].copy()
+RHS = indicies[1].copy()
+FSTA = indicies[2].copy()
+VDC = indicies[3].copy()
+PBJ = indicies[4].copy()
+XLY = indicies[5].copy()
+FXG = indicies[6].copy() 
+
 
 #End the session
 if conn is not None:
