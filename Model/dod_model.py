@@ -36,29 +36,6 @@ XLY_test = ind.XLY[int(0.7*(len(ind.XLY))):]
 FXG_train = ind.FXG[:int(0.7*(len(ind.FXG)))]
 FXG_test = ind.FXG[int(0.7*(len(ind.FXG))):]
 
-#train.drop('date',axis=1,inplace=True)
-#train.drop('total_sales',axis=1,inplace=True)
-#train.drop('check_count',axis=1,inplace=True)
-#train.drop('temp',axis=1,inplace=True)
-#train.drop('humidity',axis=1,inplace=True)
-#train.drop('severity',axis=1,inplace=True)
-#
-#test.drop('date',axis=1,inplace=True)
-#test.drop('total_sales',axis=1,inplace=True)
-#test.drop('check_count',axis=1,inplace=True)
-#test.drop('temp',axis=1,inplace=True)
-#test.drop('humidity',axis=1,inplace=True)
-#test.drop('severity',axis=1,inplace=True)
-
-
-
-
-
-
-
-
-
-
 
 
 

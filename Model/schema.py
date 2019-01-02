@@ -23,6 +23,11 @@ month_enum = """CREATE TYPE month_enum AS ENUM (
             'december'
             )
             """
+state_enum = """CREATE TYPE state_enum AS ENUM (
+            'ny',
+            'ct'
+            )
+            """
 course_type_enum = """CREATE TYPE course_type_enum AS ENUM (
             'beverages',
             'first course',
@@ -126,6 +131,15 @@ CREATE TABLE weather (
     )
 """
 
+food_services_gdp_Schema = """
+CREATE TABLE food_services_gdp (
+    gdp_id serial PRIMARY KEY,
+    state state_enum NOT NULL,
+    gdp NUMERIC NOT NULL,
+    date TIMESTAMP NOT NULL
+    )
+"""
+
 course_check_id_index = "CREATE INDEX courses_check_fkey ON courses (check_id)"
 item_check_id_index = "CREATE INDEX items_check_fkey ON items (check_id)"
 item_course_id_index = "CREATE INDEX items_course_fkey ON items (course_id)"
@@ -141,34 +155,40 @@ def create_schema():
         # f"{weatherSchema}",
         # f"{quotesSchema}",
 
+        # GDP DATA
+        "DROP TABLE food_services_gdp",
+        "DROP TYPE state_enum",
+        f"{state_enum}",
+        f"{food_services_gdp_Schema}"
+
         #POS DATA
-        "DROP TABLE items",
-        "DROP TABLE courses",
-        "DROP TABLE checks",
-        "DROP TYPE status_enum",
-        "DROP TYPE tax_type_enum",
-        "DROP TYPE day_enum",
-        "DROP TYPE day_of_week_enum",
-        "DROP TYPE month_enum",
-        "DROP TYPE course_type_enum",
-        "DROP TYPE vc_enum",
-        "DROP TYPE vc_reason_enum",
-        "DROP TYPE check_type_enum",
-        f"{status_enum}",
-        f"{tax_type_enum}",
-        f"{day_enum}",
-        f"{day_of_week_enum}",
-        f"{month_enum}",
-        f"{course_type_enum}",
-        f"{vc_enum}",
-        f"{vc_reason_enum}",
-        f"{check_type_enum}",
-        f"{checkSchema}",
-        f"{courseSchema}",
-        f"{itemSchema}",
-        f"{course_check_id_index}",
-        f"{item_check_id_index}",
-        f"{item_course_id_index}"
+        # "DROP TABLE items",
+        # "DROP TABLE courses",
+        # "DROP TABLE checks",
+        # "DROP TYPE status_enum",
+        # "DROP TYPE tax_type_enum",
+        # "DROP TYPE day_enum",
+        # "DROP TYPE day_of_week_enum",
+        # "DROP TYPE month_enum",
+        # "DROP TYPE course_type_enum",
+        # "DROP TYPE vc_enum",
+        # "DROP TYPE vc_reason_enum",
+        # "DROP TYPE check_type_enum",
+        # f"{status_enum}",
+        # f"{tax_type_enum}",
+        # f"{day_enum}",
+        # f"{day_of_week_enum}",
+        # f"{month_enum}",
+        # f"{course_type_enum}",
+        # f"{vc_enum}",
+        # f"{vc_reason_enum}",
+        # f"{check_type_enum}",
+        # f"{checkSchema}",
+        # f"{courseSchema}",
+        # f"{itemSchema}",
+        # f"{course_check_id_index}",
+        # f"{item_check_id_index}",
+        # f"{item_course_id_index}"
         )
 
     conn = None
