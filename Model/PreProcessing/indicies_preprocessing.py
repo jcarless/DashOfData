@@ -1,3 +1,5 @@
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import psycopg2
 from config import config 
 import pandas
@@ -13,7 +15,7 @@ try:
     conn = psycopg2.connect(**params)
     cur = conn.cursor()
 except (Exception, psycopg2.DatabaseError) as error:
-    print("CONNECTION ERROR: ", error)
+    raise error
 
 #Query DB for index quotes and return a list of tuples
 def get_indicies():
@@ -73,7 +75,7 @@ def get_indicies():
        return quote_lists
 
    except (Exception, psycopg2.DatabaseError) as error:
-       print("get_checks error: ", error)
+       raise error
 
 
 #Convert the list of index quote tuples into dataframes and assign to variables

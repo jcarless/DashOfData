@@ -156,10 +156,10 @@ def create_schema():
         # f"{quotesSchema}",
 
         # GDP DATA
-        "DROP TABLE food_services_gdp",
-        "DROP TYPE state_enum",
-        f"{state_enum}",
-        f"{food_services_gdp_Schema}"
+        # "DROP TABLE food_services_gdp",
+        # "DROP TYPE state_enum",
+        # f"{state_enum}",
+        # f"{food_services_gdp_Schema}"
 
         #POS DATA
         # "DROP TABLE items",

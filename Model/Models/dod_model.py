@@ -1,3 +1,5 @@
+import os, sys
+sys.path.append("../PreProcessing")
 import posData_preprocessing
 import indicies_preprocessing as ind
 posData = posData_preprocessing.posData
@@ -7,6 +9,7 @@ cols = [
         "guests",
         "check_count",
         "temp",
+        "high_temp",
         "humidity",
         "severity"
         ]
@@ -35,9 +38,6 @@ XLY_test = ind.XLY[int(0.7*(len(ind.XLY))):]
 
 FXG_train = ind.FXG[:int(0.7*(len(ind.FXG)))]
 FXG_test = ind.FXG[int(0.7*(len(ind.FXG))):]
-
-
-
 
 
 #train['guests'].plot()

@@ -30,7 +30,7 @@ prediction = model_fit.forecast(model_fit.y, steps=len(test))
 #converting predictions to dataframe
 pred = pandas.DataFrame(index=range(0,len(prediction)),columns=cols)
 pred.index = test.index
-for j in range(0,6):
+for j in range(0,7):
     for i in range(0, len(prediction)):
        pred.iloc[i][j] = prediction[i][j]
 

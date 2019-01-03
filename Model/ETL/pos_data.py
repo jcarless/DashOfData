@@ -1,3 +1,6 @@
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# import config
 import psycopg2
 from psycopg2.extensions import AsIs
 from psycopg2.extras import execute_values
@@ -138,7 +141,7 @@ def insert_course(item):
 
     return cur.fetchone()[0]
 
-xls = ExcelFile('nydata-3.xlsx')
+xls = ExcelFile('nydata-9.xlsx')
 df = xls.parse(xls.sheet_names[0])
 
 for i in df.index:
