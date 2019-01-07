@@ -1,29 +1,24 @@
-import dod_model
+import dod_model as m 
 from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing, Holt
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
-import posData_preprocessing
+from posData_preprocessing import posData
 from math import sqrt
 import numpy as np
 
-posData = posData_preprocessing.posData
-
-train = dod_model.train
-test = dod_model.test
-
-y_hat_avg = test.copy()
-fit1 = ExponentialSmoothing(np.asarray(train['guests']),
+y_hat_avg = m.test.copy()
+fit1 = ExponentialSmoothing(np.asarray(m.train['guests']),
                             seasonal_periods=7,
                             trend='add', 
                             seasonal='add',).fit()
 
-y_hat_avg['Holt_Winter'] = fit1.forecast(len(test))
+y_hat_avg['Holt_Winter'] = fit1.forecast(len(m.test))
 plt.figure(figsize=(16,8))
-plt.plot( train['guests'], label='Train')
-plt.plot(test['guests'], label='Test')
+plt.plot( m.train['guests'], label='Train')
+plt.plot(m.test['guests'], label='Test')
 plt.plot(y_hat_avg['Holt_Winter'], label='Holt_Winter')
 plt.legend(loc='best')
 plt.show()
 
-rms = sqrt(mean_squared_error(test.guests, y_hat_avg.Holt_Winter))
+rms = sqrt(mean_squared_error(m.test.guests, y_hat_avg.Holt_Winter))
 print(rms)

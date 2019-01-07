@@ -1,5 +1,6 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config_model import start_date, end_date
 import psycopg2
 from config import config 
 import pandas
@@ -14,11 +15,11 @@ try:
     conn = psycopg2.connect(**params)
     cur = conn.cursor()
 except (Exception, psycopg2.DatabaseError) as error:
-    print("CONNECTION ERROR: ", error)
+    raise error
 
 #Query DB for our primary daily timeseries view model
 def get_daily_timeseries():
-    sql = """
+    sql = f"""
         SELECT 
         DATE("public"."weather"."timestamp") AS "date", 
         SUM(distinct "public"."checks"."total") AS "total_sales", 
@@ -34,7 +35,7 @@ def get_daily_timeseries():
         RIGHT JOIN "public"."weather" 
         ON DATE("public"."weather"."timestamp") = DATE("public"."checks"."timestamp")
         
-        WHERE DATE("public"."weather"."timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
+        WHERE DATE("public"."weather"."timestamp") BETWEEN '{start_date}' AND '{end_date}'
         
         GROUP BY DATE("public"."weather"."timestamp")
         ORDER BY "date" ASC
@@ -87,7 +88,21 @@ posData.index = posData['date']
 posData.drop('date',axis=1,inplace=True)
 #posData = posData.asfreq(freq='d')
 
-missingDates = pandas.date_range(start = '2014-3-31', end = '2015-9-30' ).difference(posData.index)
+#Log transform
+#posData["guests"] = posData["guests"].mask(posData["guests"] == 0, 0.0001)
+posData['guests_log'] = np.log(posData['guests'])
+posData['guests_log_diff'] = posData['guests_log'] - posData['guests_log'].shift(1)
+posData['guests_log_diff'] = posData['guests_log_diff'].dropna()
+#posData['guests_log_diff'].dropna().plot()
+
+posData['temp_log'] = np.log(posData['temp'])
+posData['temp_log_diff'] = posData['temp_log'] - posData['temp_log'].shift(1)
+posData['temp_log_diff'] = posData['temp_log_diff'].dropna()
+posData["temp_log_diff"][0] = 0
+posData["guests_log_diff"][0] = 0
+#posData['temp_log_diff'].dropna().plot()
+
+missingDates = pandas.date_range(start = start_date, end = end_date ).difference(posData.index)
 
 if len(missingDates) > 0:
     raise Exception(f"{len(missingDates)} Dates are missing from the timeseries: \n{missingDates}")

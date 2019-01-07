@@ -13,8 +13,8 @@ def kpss_test(timeseries):
    
    for key,value in kpsstest[3].items():
        kpss_output['Critical Value (%s)'%key] = value
-   print (kpss_output)
+   print ("OUTPUT: ", kpss_output)
    
-kpss_test(train['guests_diff'])
+kpss_test(train['guests_log'])
 print("========")
 kpss_test(train['guests'])

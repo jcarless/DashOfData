@@ -1,5 +1,6 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config_model import start_date, end_date
 import psycopg2
 from config import config 
 import pandas
@@ -20,47 +21,53 @@ except (Exception, psycopg2.DatabaseError) as error:
 #Query DB for index quotes and return a list of tuples
 def get_indicies():
    sql = [
-           """
+           f"""
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'IYK'
-           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
+           AND DATE("timestamp") BETWEEN '{start_date}' AND '{end_date}'
            """,
-           """
+           f"""
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'RHS'
-           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
+           AND DATE("timestamp") BETWEEN '{start_date}' AND '{end_date}'
            """,
-           """
+           f"""
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'FSTA'
-           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
+           AND DATE("timestamp") BETWEEN '{start_date}' AND '{end_date}'
            """,
-           """
+           f"""
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'VDC'
-           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
+           AND DATE("timestamp") BETWEEN '{start_date}' AND '{end_date}'
            """,
-           """
+           f"""
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'PBJ'
-           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
+           AND DATE("timestamp") BETWEEN '{start_date}' AND '{end_date}'
            """,
-           """
+           f"""
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'XLY'
-           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
+           AND DATE("timestamp") BETWEEN '{start_date}' AND '{end_date}'
            """,
-           """
+           f"""
            SELECT "timestamp", "index_name", "symbol", "close" 
            FROM "public"."quotes" 
            WHERE "symbol" = 'FXG'
-           AND DATE("timestamp") BETWEEN '2014-3-31' AND '2015-9-30'
+           AND DATE("timestamp") BETWEEN '{start_date}' AND '{end_date}'
+           """,
+           f"""
+           SELECT "timestamp", "index_name", "symbol", "close" 
+           FROM "public"."quotes" 
+           WHERE "symbol" = 'QQQ'
+           AND DATE("timestamp") BETWEEN '{start_date}' AND '{end_date}'
            """
           ]
            
@@ -97,7 +104,7 @@ for index in get_indicies():
    
    df = df.asfreq(freq='d',method='backfill')
    
-   missingDates = pandas.date_range(start = '2014-3-31', end = '2015-9-30' ).difference(df.index)
+   missingDates = pandas.date_range(start = start_date, end = end_date ).difference(df.index)
 
    if len(missingDates) > 0:
        raise Exception(f"{len(missingDates)} Dates are missing from the timeseries: \n{missingDates}")
@@ -111,6 +118,8 @@ VDC = indicies[3].copy()
 PBJ = indicies[4].copy()
 XLY = indicies[5].copy()
 FXG = indicies[6].copy() 
+QQQ = indicies[7].copy() 
+
 
 
 #End the session
