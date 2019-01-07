@@ -1,38 +1,72 @@
-import os, sys
+import sys
+#sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append("Model/PreProcessing")
 from posData_preprocessing import posData
 import indicies_preprocessing as ind
 from econData_preprocessing import econData
-import numpy as np
-           
-#divide into train and test set
-train = posData[:int(0.7*(len(posData)))]
-test = posData[int(0.7*(len(posData))):]
+from sarima_model import sarimax_model
+from holtwinter_model import holtwinter_model
+import matplotlib.pyplot as plt
+import pandas as pd
 
-IYK_train = ind.IYK[:int(0.7*(len(ind.IYK)))]
-IYK_test = ind.IYK[int(0.7*(len(ind.IYK))):]
+cols = [
+        "total_sales",
+        "guests",
+        "check_count",
+        "temp",
+        "high_temp",
+        "humidity",
+        "severity",
+        "guests_log",
+        "guests_log_diff",
+        "temp_log",
+        "temp_log_diff"
+        ]
 
-RHS_train = ind.RHS[:int(0.7*(len(ind.RHS)))]
-RHS_test = ind.RHS[int(0.7*(len(ind.RHS))):]
+start_date = '2014-03-31'
+end_date = '2018-6-29'
 
-FSTA_train = ind.FSTA[:int(0.7*(len(ind.FSTA)))]
-FSTA_test = ind.FSTA[int(0.7*(len(ind.FSTA))):]
+target_variable = pd.DataFrame(posData["guests"])
 
-VDC_train = ind.VDC[:int(0.7*(len(ind.VDC)))]
-VDC_test = ind.VDC[int(0.7*(len(ind.VDC))):]
+train = target_variable[:int(0.7*(len(target_variable)))]
+test = target_variable[int(0.7*(len(target_variable))):]
 
-PBJ_train = ind.PBJ[:int(0.7*(len(ind.PBJ)))]
-PBJ_test = ind.PBJ[int(0.7*(len(ind.PBJ))):]
+exog_variables = [
+          posData['temp'],
+          posData['severity'],
+          posData['humidity'],
+          posData['high_temp'],
+          ind.IYK['close'],
+          ind.RHS['close'],
+          ind.FSTA['close'],
+          ind.VDC['close'],
+          ind.PBJ['close'],
+          ind.XLY['close'],
+          ind.FXG['close'],
+          econData['gdp']
+        ]
 
-XLY_train = ind.XLY[:int(0.7*(len(ind.XLY)))]
-XLY_test = ind.XLY[int(0.7*(len(ind.XLY))):]
+plt.figure(figsize=(16,8))
+#plt.plot(train[train.columns[0]], label='dod_model.Train')
+plt.plot(test[test.columns[0]], label='Test')
 
-FXG_train = ind.FXG[:int(0.7*(len(ind.FXG)))]
-FXG_test = ind.FXG[int(0.7*(len(ind.FXG))):]
+sarimax_result = sarimax_model(target_variable, exog_variables, train, test, start_date, end_date)
+print("SARIMAX Summary: ", sarimax_result["summary"])
+print("SARIMAX RMS: ", sarimax_result["rms"])
 
-QQQ_train = ind.QQQ[:int(0.7*(len(ind.QQQ)))]
-QQQ_test = ind.QQQ[int(0.7*(len(ind.QQQ))):]
+holtwinter_result = holtwinter_model(target_variable, train, test)
+print("HOLTWINTER Summary: ", holtwinter_result["summary"])
+print("HOLTWINTER RMS: ", holtwinter_result["rms"])
 
-econ_train = econData[:int(0.7*(len(econData)))]
-econ_test = econData[int(0.7*(len(econData))):]
 
+
+
+
+
+
+
+plt.legend(loc='best')
+plt.show()
+
+#fit1.plot_diagnostics(figsize=(15, 12))
+#plt.show()
