@@ -86,21 +86,14 @@ posData["guests"] = posData["guests"].mask(posData["guests"] == 0, 0.0001)
 posData['date'] = pandas.to_datetime(posData['date'])
 posData.index = posData['date']
 posData.drop('date',axis=1,inplace=True)
-#posData = posData.asfreq(freq='d')
+posData = posData.asfreq(freq='d')
 
 #Log transform
-#posData["guests"] = posData["guests"].mask(posData["guests"] == 0, 0.0001)
 posData['guests_log'] = np.log(posData['guests'])
+posData['guests_log'][posData['guests_log'] < 0] = 0
 posData['guests_log_diff'] = posData['guests_log'] - posData['guests_log'].shift(1)
 posData['guests_log_diff'] = posData['guests_log_diff'].dropna()
-#posData['guests_log_diff'].dropna().plot()
-
-posData['temp_log'] = np.log(posData['temp'])
-posData['temp_log_diff'] = posData['temp_log'] - posData['temp_log'].shift(1)
-posData['temp_log_diff'] = posData['temp_log_diff'].dropna()
-posData["temp_log_diff"][0] = 0
 posData["guests_log_diff"][0] = 0
-#posData['temp_log_diff'].dropna().plot()
 
 missingDates = pandas.date_range(start = start_date, end = end_date ).difference(posData.index)
 

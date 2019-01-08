@@ -22,11 +22,11 @@ def sarimax_model(target_variable, exog_variables, train, test, start_date, end_
 
     y_hat_avg = test
     fit1 = sm.tsa.SARIMAX(train, exog=exog_train, order=(2,0,0), seasonal_order=(1, 1, 1, 12)).fit()
-    y_hat_avg['SARIMA'] = fit1.predict(exog=exog_test, start = start_date, end = end_date, dynamic=True)
+    y_hat_avg['SARIMA'] = fit1.predict(exog=exog_test, start = start_date, end = end_date, dynamic=False)
     plt.plot(y_hat_avg['SARIMA'] ,label='SARIMA')
 
 #    fit1.plot_diagnostics(figsize=(15, 12))
 #    plt.show()
     
     rms = sqrt(mean_squared_error(test[test.columns[0]], y_hat_avg.SARIMA))
-    return { "rms": rms, "summary": fit1.summary(), "prediction": y_hat_avg['SARIMA'] }
+    return { "rms": rms, "fit": fit1, "prediction": y_hat_avg['SARIMA'] }
