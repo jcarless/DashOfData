@@ -2,6 +2,21 @@ import psycopg2
 from config import config
 
 # Enums
+account_type_enum = """CREATE TYPE account_type_enum AS ENUM (
+            'restaurant'
+            )
+            """
+model_category_enum = """CREATE TYPE model_category_enum AS ENUM (
+            'var',
+            'svar',
+            'mlp',
+            'lstm',
+            'arima',
+            'sarima',
+            'sarimax',
+            'holtwinter'
+            )
+            """
 condition_main_enum = "CREATE TYPE condition_main_enum AS ENUM ('clear', 'clouds', 'mist', 'haze', 'fog', 'smoke', 'dust', 'sand', 'drizzle', 'rain', 'squall', 'snow', 'thunderstorm', 'extreme')"
 check_type_enum = "CREATE TYPE check_type_enum AS ENUM ('table', 'tab', 'takeout')"
 status_enum = "CREATE TYPE status_enum AS ENUM ('open', 'closed')"
@@ -140,6 +155,34 @@ CREATE TABLE food_services_gdp (
     )
 """
 
+accounts_Schema = """
+CREATE TABLE accounts (
+    account_id serial PRIMARY KEY,
+    name TEXT,
+    address TEXT NOT NULL,
+    city TEXT NOT NULL,
+    state state_enum NOT NULL,
+    zip TEXT,
+    type account_type_enum
+    )
+"""
+
+model_parameters_Schema = """
+CREATE TABLE model_parameters (
+    parameter_id serial PRIMARY KEY,
+    model_category model_category_enum NOT NULL,
+    date TIMESTAMP NOT NULL,
+    p_ INTEGER,
+    d_ INTEGER,
+    q_ INTEGER,
+    P INTEGER,
+    D INTEGER,
+    Q INTEGER,
+    s INTEGER,
+    account_id INTEGER REFERENCES accounts (account_id)
+    )
+"""
+
 course_check_id_index = "CREATE INDEX courses_check_fkey ON courses (check_id)"
 item_check_id_index = "CREATE INDEX items_check_fkey ON items (check_id)"
 item_course_id_index = "CREATE INDEX items_course_fkey ON items (course_id)"
@@ -188,7 +231,18 @@ def create_schema():
         # f"{itemSchema}",
         # f"{course_check_id_index}",
         # f"{item_check_id_index}",
-        # f"{item_course_id_index}"
+        # f"{item_course_id_index}",
+
+        # "DROP TABLE IF EXISTS model_parameters",
+        # "DROP TABLE IF EXISTS accounts",
+        # "DROP TYPE IF EXISTS account_type_enum",
+        # "DROP TYPE IF EXISTS model_category_enum",
+
+        # f"{account_type_enum}",
+        # f"{model_category_enum}",
+        # f"{accounts_Schema}",
+        # f"{model_parameters_Schema}",
+
         )
 
     conn = None
@@ -213,7 +267,6 @@ def create_schema():
 
         # commit the changes
         conn.commit()
-        pass
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
