@@ -1,5 +1,6 @@
 import os, sys
 sys.path.append("Model/PreProcessing")
+sys.path.append("Model/Models")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config_model import start_date, end_date
 from posData_preprocessing import posData
@@ -36,8 +37,8 @@ print("target_variable Standard Deviation: ", np.std(target_variable))
 
 #External variables used in predictions
 exog_variables = [
-          posData['temp_log_diff'],
-#          posData['severity'],
+#          posData['temp_log_diff'],
+          posData['severity'],
 #          posData['humidity'],
 ##          ind.IYK['close'],
 ##          ind.RHS['close'],
@@ -59,9 +60,7 @@ sarimax_result = sarimax_model(target_variable,
                                True
                                )
 
-print("SARIMAX Summary: ", sarimax_result["fit"].summary())
 #print("SARIMAX RMSE_TRAIN: ", sarimax_result["rmse_train"])
-print("SARIMAX RMSE_TEST: ", sarimax_result["rmse_test"])
 #print("SARIMAX RMSE_TEST: ", sarimax_result["rms"])
 
 
@@ -69,13 +68,15 @@ print("SARIMAX RMSE_TEST: ", sarimax_result["rmse_test"])
 
 #HoltWinter
 holtwinter_result = holtwinter_model(target_variable, n_test, True)
-print("HOLTWINTER Summary: ", holtwinter_result["summary"])
+
+
+#SUMMARY
+print("SARIMAX Summary: ", sarimax_result["fit"].summary())
+print("SARIMAX RMSE_TEST: ", sarimax_result["rmse_test"])
 print("HOLTWINTER RMS: ", holtwinter_result["rms"])
 
 
 ##MLP
-
-#
 ## define config
 ##n_input, n_nodes, n_epochs, n_batch
 #config = [7, 500, 100, 100]
@@ -90,3 +91,5 @@ print("HOLTWINTER RMS: ", holtwinter_result["rms"])
 #scores = repeat_evaluate(target_variable, config, n_test)
 ## summarize scores
 #summarize_scores('mlp', scores)
+
+

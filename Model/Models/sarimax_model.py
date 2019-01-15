@@ -38,7 +38,7 @@ def sarimax_model(target_variable, exog_variables, start_date, end_date, n_test,
     exog_test = np.column_stack(exog_variables_test)
     
     #Get best model configuration
-    p,d,q,P,D,Q,s = get_params("sarimax", 24, 1)
+    p,d,q,P,D,Q,s = get_params("sarimax", 52, 1)
         
     #Fit the model
     y_hat_avg = test
