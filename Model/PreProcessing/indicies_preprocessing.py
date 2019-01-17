@@ -1,22 +1,11 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from db_functions import db_connection, db_close
 from config_model import start_date, end_date
 import psycopg2
-from config import config 
 import pandas
-import pandas.io.sql as psql
-import numpy as np
 
-conn = None
-
-#Create a connection to RDS
-try:
-    params = config()
-    print('Connecting to the PostgreSQL database...')
-    conn = psycopg2.connect(**params)
-    cur = conn.cursor()
-except (Exception, psycopg2.DatabaseError) as error:
-    raise error
+conn, cur = db_connection()
 
 #Query DB for index quotes and return a list of tuples
 def get_indicies():
@@ -111,6 +100,14 @@ for index in get_indicies():
 
    indicies.append(df)
 
+for i in range(0, len(indicies)):
+    fund = indicies[i]
+    fund[f'{fund["symbol"][0]}_close_diff'] = fund['close'] - fund['close'].shift(7)
+    fund[f'{fund["symbol"][0]}_close_diff'] = fund[f'{fund["symbol"][0]}_close_diff'].dropna()
+    for i in range(0,7):
+        fund[f'{fund["symbol"][0]}_close_diff'][i] = 0
+        
+    
 IYK = indicies[0].copy()
 RHS = indicies[1].copy()
 FSTA = indicies[2].copy()
@@ -120,9 +117,4 @@ XLY = indicies[5].copy()
 FXG = indicies[6].copy() 
 QQQ = indicies[7].copy() 
 
-
-
-#End the session
-if conn is not None:
-    print("Closing connection...")
-    conn.close()
+db_close(conn)

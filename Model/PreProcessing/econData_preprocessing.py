@@ -1,20 +1,12 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from db_functions import db_connection, db_close
 from config_model import start_date, end_date
 import psycopg2
 from config import config 
 import pandas
 
-conn = None
-
-#Create a connection to RDS
-try:
-    params = config()
-    print('Connecting to the PostgreSQL database...')
-    conn = psycopg2.connect(**params)
-    cur = conn.cursor()
-except (Exception, psycopg2.DatabaseError) as error:
-    raise error
+conn, cur = db_connection()
 
 #Query DB for index quotes and return a list of tuples
 def get_economy():
@@ -46,7 +38,4 @@ missingDates = pandas.date_range(start = start_date, end = end_date ).difference
 if len(missingDates) > 0:
     raise Exception(f"{len(missingDates)} Dates are missing from the timeseries: \n{missingDates}")
 
-#End the session
-if conn is not None:
-    print("Closing connection...")
-    conn.close()
+db_close(conn)

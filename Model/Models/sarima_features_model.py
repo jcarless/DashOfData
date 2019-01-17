@@ -136,7 +136,7 @@ D=1  # 1 as we performed seasonal differentiation
     # D=0 if the series has an unstable seasonal pattern over time.
 Qs = range(0, 2) # set range between values that exceed the plot (except for x=0)
     # Q≥1 if the ACF is negative at lag S, else Q=0
-s = 24 # season length is 24
+s = 54 # season length is 24
     # S is equal to the ACF lag with the highest value (typically at a high lag)
 
 # creating list with all the possible combinations of parameters
@@ -160,7 +160,7 @@ def optimizeSARIMA(parameters_list, d, D, s):
     for param in tqdm_notebook(parameters_list):
         # we need try-except because on some combinations model fails to converge
         try:
-            model = sm.tsa.SARIMAX(posData["guests_log_diff"], enforce_invertibility=False, order=(param[0], d, param[1]), 
+            model = sm.tsa.SARIMAX(posData["guests_diff"], enforce_invertibility=False, order=(param[0], d, param[1]), 
                                             seasonal_order=(param[2], D, param[3], s)).fit(disp=1)
             aic = model.aic
             print("AIC: ", aic)

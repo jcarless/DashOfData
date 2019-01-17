@@ -32,13 +32,13 @@ cols = [
 n_test = 7
 
 #Target variable series we are trying to predict
-target_variable = pd.DataFrame(posData["guests_log_diff"])
-print("target_variable Standard Deviation: ", np.std(target_variable))
+target_variable = pd.DataFrame(posData["guests_diff"])
+
 
 #External variables used in predictions
 exog_variables = [
-#          posData['temp_log_diff'],
-          posData['severity'],
+          posData['temp_log_diff'],
+#          posData['severity'],
 #          posData['humidity'],
 ##          ind.IYK['close'],
 ##          ind.RHS['close'],
@@ -72,6 +72,7 @@ holtwinter_result = holtwinter_model(target_variable, n_test, True)
 
 #SUMMARY
 print("SARIMAX Summary: ", sarimax_result["fit"].summary())
+print("target_variable Standard Deviation: ", np.std(target_variable))
 print("SARIMAX RMSE_TEST: ", sarimax_result["rmse_test"])
 print("HOLTWINTER RMS: ", holtwinter_result["rms"])
 

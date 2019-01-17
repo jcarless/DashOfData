@@ -7,15 +7,10 @@ from econData_preprocessing import econData
 import pandas as pd
 from lags import lags
 from kpss_test import kpss_test
-from coint_adf_test import adf
-#from johansen import coint_johansen
+from adf_test import adf_test
 
-#print("KPSS GUESTS LOG: ", kpss_test(posData["guests_log"]))
-#print("KPSS GUESTS LOG DIFF: ", kpss_test(posData["guests_log_diff"]))
-
-#print("ADF GUESTS LOG: ", adf(posData["guests_log"]))
-#print("ADF GUESTS LOG DIFF: ", adf(posData["guests_log_diff"]))
-
+print("KPSS TEST: ", kpss_test(posData["guests_diff"]))
+print("ADF TEST: ", adf_test(posData["guests_diff"]))
 
 #ind.IYK["GDP"] = econData["gdp"]
 df = pd.DataFrame()
@@ -40,10 +35,6 @@ df["temp_diff"] = posData['temp_diff']
 df["guests_diff_percent"] = posData['guests_diff_percent']
 df["temp_diff_percent"] = posData['temp_diff_percent']
 
-
-
-#print(coint_johansen(df, 0, 1))
-
 df = QQQ_lag.join(df, on=None, how="left")
 df = IYK_lag.join(df, on=None, how="left")
 df = XLY_lag.join(df, on=None, how="left")
@@ -52,9 +43,4 @@ df = FSTA_lag.join(df, on=None, how="left")
 df = FXG_lag.join(df, on=None, how="left")
 
 
-
-
-plot = df.corr(method = "pearson")
-
-
-print(df.corr(method = "pearson"))
+correlation_matrix = df.corr(method = "pearson")

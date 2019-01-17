@@ -1,21 +1,15 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from db_functions import db_connection, db_close
 from config_model import start_date, end_date
 import psycopg2
 from config import config 
 import pandas
 import pandas.io.sql as psql
 import numpy as np
-conn = None
 
-#Create a connection to RDS
-try:
-    params = config()
-    print('Connecting to the PostgreSQL database...')
-    conn = psycopg2.connect(**params)
-    cur = conn.cursor()
-except (Exception, psycopg2.DatabaseError) as error:
-    raise error
+conn, cur = db_connection()
+
 
 #Query DB for our primary daily timeseries view model
 def get_daily_timeseries():
@@ -88,19 +82,76 @@ posData.index = posData['date']
 posData.drop('date',axis=1,inplace=True)
 posData = posData.asfreq(freq='d')
 
-#Guests log transform
+#Guests transform
 posData['guests_log'] = np.log(posData['guests'])
 posData['guests_log'][posData['guests_log'] < 0] = 0
-posData['guests_log_diff'] = posData['guests_log'] - posData['guests_log'].shift(1)
+posData['guests_log_diff'] = posData['guests_log'] - posData['guests_log'].shift(7)
 posData['guests_log_diff'] = posData['guests_log_diff'].dropna()
 posData["guests_log_diff"][0] = 0
+posData["guests_log_diff"][1] = 0
+posData["guests_log_diff"][2] = 0
+posData["guests_log_diff"][3] = 0
+posData["guests_log_diff"][4] = 0
+posData["guests_log_diff"][5] = 0
+posData["guests_log_diff"][6] = 0
 
-#Temp log transform
+
+posData['guests_diff'] = posData['guests'] - posData['guests'].shift(7)
+posData['guests_diff'] = posData['guests_diff'].dropna()
+posData["guests_diff"][0] = 0
+posData["guests_diff"][1] = 0
+posData["guests_diff"][2] = 0
+posData["guests_diff"][3] = 0
+posData["guests_diff"][4] = 0
+posData["guests_diff"][5] = 0
+posData["guests_diff"][6] = 0
+
+posData['guests_diff_percent'] = ((posData['guests'] - posData['guests'].shift(7)) 
+    / ((posData['guests'] + posData['guests'].shift(7) 
+    / 2)))
+posData['guests_diff_percent'] = posData['guests_diff_percent'].dropna()
+posData["guests_diff_percent"][0] = 0
+posData["guests_diff_percent"][1] = 0
+posData["guests_diff_percent"][2] = 0
+posData["guests_diff_percent"][3] = 0
+posData["guests_diff_percent"][4] = 0
+posData["guests_diff_percent"][5] = 0
+posData["guests_diff_percent"][6] = 0
+
+#Temp transform
 posData['temp_log'] = np.log(posData['temp'])
 posData['temp_log'][posData['temp_log'] < 0] = 0
-posData['temp_log_diff'] = posData['temp_log'] - posData['temp_log'].shift(1)
+posData['temp_log_diff'] = posData['temp_log'] - posData['temp_log'].shift(7)
 posData['temp_log_diff'] = posData['temp_log_diff'].dropna()
 posData["temp_log_diff"][0] = 0
+posData["temp_log_diff"][1] = 0
+posData["temp_log_diff"][2] = 0
+posData["temp_log_diff"][3] = 0
+posData["temp_log_diff"][4] = 0
+posData["temp_log_diff"][5] = 0
+posData["temp_log_diff"][6] = 0
+
+posData['temp_diff'] = posData['temp'] - posData['temp'].shift(7)
+posData['temp_diff'] = posData['temp_diff'].dropna()
+posData["temp_diff"][0] = 0
+posData["temp_diff"][1] = 0
+posData["temp_diff"][2] = 0
+posData["temp_diff"][3] = 0
+posData["temp_diff"][4] = 0
+posData["temp_diff"][5] = 0
+posData["temp_diff"][6] = 0
+
+posData['temp_diff_percent'] = ((posData['temp'] - posData['temp'].shift(7)) 
+    / ((posData['temp'] + posData['temp'].shift(7) 
+    / 2)))
+posData['temp_diff_percent'] = posData['temp_diff_percent'].dropna()
+posData["temp_diff_percent"][0] = 0
+posData["temp_diff_percent"][1] = 0
+posData["temp_diff_percent"][2] = 0
+posData["temp_diff_percent"][3] = 0
+posData["temp_diff_percent"][4] = 0
+posData["temp_diff_percent"][5] = 0
+posData["temp_diff_percent"][6] = 0
 
 missingDates = pandas.date_range(start = start_date, end = end_date ).difference(posData.index)
 
@@ -108,7 +159,4 @@ if len(missingDates) > 0:
     raise Exception(f"{len(missingDates)} Dates are missing from the timeseries: \n{missingDates}")
 
 
-#End the session
-if conn is not None:
-    print("Closing connection...")
-    conn.close()
+db_close(conn)
