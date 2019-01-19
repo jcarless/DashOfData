@@ -3,9 +3,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from db_functions import db_connection, db_close
 from config_model import start_date, end_date
 import psycopg2
-from config import config 
 import pandas
-import pandas.io.sql as psql
 import numpy as np
 
 conn, cur = db_connection()
@@ -16,8 +14,8 @@ def get_daily_timeseries():
     sql = f"""
         SELECT 
         DATE("public"."weather"."timestamp") AS "date", 
-        SUM(distinct "public"."checks"."total") AS "total_sales", 
-        SUM("public"."checks"."guests") AS "guests",
+        SUM(distinct "public"."checks"."total") / 24 AS "total_sales", 
+        SUM("public"."checks"."guests") / 24 AS "guests",
         COUNT(distinct "public"."checks"."check_id") AS "check_count",
         ROUND(AVG(distinct "public"."weather"."temp"), 2) AS "temp",
         ROUND(MAX(distinct "public"."weather"."high_temp"), 2) AS "high_temp",
@@ -152,6 +150,28 @@ posData["temp_diff_percent"][3] = 0
 posData["temp_diff_percent"][4] = 0
 posData["temp_diff_percent"][5] = 0
 posData["temp_diff_percent"][6] = 0
+
+#Severity differences transform
+posData['severity_diff'] = posData['severity'] - posData['severity'].shift(7)
+posData['severity_diff'] = posData['severity_diff'].dropna()
+posData["severity_diff"][0] = 0
+posData["severity_diff"][1] = 0
+posData["severity_diff"][2] = 0
+posData["severity_diff"][3] = 0
+posData["severity_diff"][4] = 0
+posData["severity_diff"][5] = 0
+posData["severity_diff"][6] = 0
+
+#Humidity differences transform
+posData['humidity_diff'] = posData['humidity'] - posData['humidity'].shift(7)
+posData['humidity_diff'] = posData['humidity_diff'].dropna()
+posData["humidity_diff"][0] = 0
+posData["humidity_diff"][1] = 0
+posData["humidity_diff"][2] = 0
+posData["humidity_diff"][3] = 0
+posData["humidity_diff"][4] = 0
+posData["humidity_diff"][5] = 0
+posData["humidity_diff"][6] = 0
 
 missingDates = pandas.date_range(start = start_date, end = end_date ).difference(posData.index)
 

@@ -42,5 +42,11 @@ df = PBJ_lag.join(df, on=None, how="left")
 df = FSTA_lag.join(df, on=None, how="left")
 df = FXG_lag.join(df, on=None, how="left")
 
+test = pd.DataFrame()
+test["guests_diff"] = df["guests_diff"]
+test["humidity"] = df["humidity"]
+test["severity"] = df["severity"]
+test["humidity"] = df["humidity"]
+test["FXG_close_diff"] = df["FXG_close_diff"]
 
-correlation_matrix = df.corr(method = "pearson")
+correlation_matrix = test.corr(method = "pearson")

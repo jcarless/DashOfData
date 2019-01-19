@@ -37,9 +37,9 @@ target_variable = pd.DataFrame(posData["guests_diff"])
 
 #External variables used in predictions
 exog_variables = [
-          posData['temp_log_diff'],
-#          posData['severity'],
-#          posData['humidity'],
+          posData['severity_diff'],
+          posData['humidity_diff'],
+          ind.FXG['FXG_close_diff'],
 ##          ind.IYK['close'],
 ##          ind.RHS['close'],
 ##          ind.FSTA['close'],
@@ -57,7 +57,7 @@ sarimax_result = sarimax_model(target_variable,
                                start_date, 
                                end_date, 
                                n_test, 
-                               True
+                               False
                                )
 
 #print("SARIMAX RMSE_TRAIN: ", sarimax_result["rmse_train"])
@@ -65,9 +65,8 @@ sarimax_result = sarimax_model(target_variable,
 
 
 
-
 #HoltWinter
-holtwinter_result = holtwinter_model(target_variable, n_test, True)
+holtwinter_result = holtwinter_model(target_variable, n_test, False)
 
 
 #SUMMARY
