@@ -16,7 +16,7 @@ def holtwinter_model(target_variable, n_test, plot):
     train, test = train_test_split(target_variable, n_test)
 
     
-    y_hat_avg = test
+    y_hat_avg = test.copy()
     #Fit the model    
     fit1 = ExponentialSmoothing(np.asarray(train[train.columns[0]]),
                                 seasonal_periods=7,

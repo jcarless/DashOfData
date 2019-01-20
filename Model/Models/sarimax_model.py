@@ -38,15 +38,15 @@ def sarimax_model(target_variable, exog_variables, start_date, end_date, n_test,
     exog_test = np.column_stack(exog_variables_test)
     
     #Get best model configuration
-    p,d,q,P,D,Q,s = get_params("sarimax", 24, 1)
+    p,d,q,P,D,Q,s = get_params("sarimax", 52, 1)
         
     #Fit the model
-    y_hat_avg = test
+    y_hat_avg = test.copy()
     fit1 = sm.tsa.SARIMAX(train, 
                           exog=exog_train, 
                           enforce_invertibility = False, 
                           order=(p,d,q), 
-                          seasonal_order=(P,D,Q,s)).fit()
+                          seasonal_order=(P,D,Q,s)).fit(maxiter=200)
     
     #Create prediction and add to dataframe
     y_hat_avg['SARIMA'] = fit1.predict(exog=exog_test, start=start_date, end=end_date, dynamic=False)
@@ -64,7 +64,7 @@ def sarimax_model(target_variable, exog_variables, start_date, end_date, n_test,
 #        #Plot SARMIAX diagnostic
 #        fit1.plot_diagnostics(figsize=(15, 12))
 #        plt.show()
-    
+
     #Calculate RMS   
     rmse_test = sqrt(mean_squared_error(test[test.columns[0]], y_hat_avg.SARIMA))
 #    rmse_train = sqrt(mean_squared_error(train[train.columns[0]], y_hat_avg.SARIMA))

@@ -84,14 +84,14 @@ for index in get_indicies():
                                     "index_name",
                                     "symbol",
                                     "close"
-                                    ])
+                                    ],
+                                 dtype=int)
        
-   df['close'] = df['close'].astype(int)
-   df['date'] = pandas.to_datetime(df['date'])
-   df.index = df['date']
+   df.date = pandas.to_datetime(df.date)
+   df.index = df.date
    df.drop('date',axis=1,inplace=True)
    
-   df = df.asfreq(freq='d',method='backfill')
+   df = df.asfreq(freq='d', method='backfill')
    
    missingDates = pandas.date_range(start = start_date, end = end_date ).difference(df.index)
 
@@ -103,10 +103,7 @@ for index in get_indicies():
 for i in range(0, len(indicies)):
     fund = indicies[i]
     fund[f'{fund["symbol"][0]}_close_diff'] = fund['close'] - fund['close'].shift(7)
-    fund[f'{fund["symbol"][0]}_close_diff'] = fund[f'{fund["symbol"][0]}_close_diff'].dropna()
-    for i in range(0,7):
-        fund[f'{fund["symbol"][0]}_close_diff'][i] = 0
-        
+    fund[f'{fund["symbol"][0]}_close_diff'].fillna(0, inplace=True)
     
 IYK = indicies[0].copy()
 RHS = indicies[1].copy()

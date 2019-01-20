@@ -5,9 +5,7 @@ def db_connection():
     try:
         from config import config 
 
-
         params = config()
-        print('Connecting to the PostgreSQL database...')
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
         
@@ -19,5 +17,4 @@ def db_connection():
 def db_close(conn=None):
     #End the session
     if conn is not None:
-        print("Closing connection...")
         conn.close()

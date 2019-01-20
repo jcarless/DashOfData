@@ -3,7 +3,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from db_functions import db_connection, db_close
 from config_model import start_date, end_date
 import psycopg2
-from config import config 
 import pandas
 
 conn, cur = db_connection()
@@ -19,7 +18,6 @@ def get_economy():
    try:           
        cur.execute(sql)
        economy = cur.fetchall()
-       print("Number of econ rows: ", cur.rowcount)
        return economy
 
    except (Exception, psycopg2.DatabaseError) as error:
