@@ -1,5 +1,7 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append("Model/Models")
+from lags import lags
 from db_functions import db_connection, db_close
 from config_model import start_date, end_date
 import psycopg2
@@ -102,8 +104,15 @@ for index in get_indicies():
 
 for i in range(0, len(indicies)):
     fund = indicies[i]
-    fund[f'{fund["symbol"][0]}_close_diff'] = fund['close'] - fund['close'].shift(7)
-    fund[f'{fund["symbol"][0]}_close_diff'].fillna(0, inplace=True)
+    name = fund["symbol"][0]
+    fund[f'{name}_close_diff'] = fund['close'] - fund['close'].shift(7)
+    fund[f'{name}_close_diff'].fillna(0, inplace=True)
+    
+    lag = lags(fund, name)
+    lag7 = lag[f'{name}_close_lag_7'].copy()
+    
+    fund[f'{name}_close_diff_lag7'] = lag7 - lag7.shift(7)
+    fund[f'{name}_close_diff_lag7'].fillna(0, inplace=True)
     
 IYK = indicies[0].copy()
 RHS = indicies[1].copy()

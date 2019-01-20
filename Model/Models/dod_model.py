@@ -21,7 +21,7 @@ n_test = 7
 exog_variables = [
           posData.severity_diff,
           posData.humidity_diff,
-          ind.FXG.FXG_close_diff
+          ind.FXG.FXG_close_diff_lag7
         ]
 
 #SARIMAX
