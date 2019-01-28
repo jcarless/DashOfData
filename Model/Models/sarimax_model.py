@@ -16,7 +16,7 @@ def sarimax_model(target_variable, exog_variables, start_date, end_date, n_test,
     from math import sqrt
     import numpy as np
     import pandas as pd
-    from sarimax_params import get_params
+    from sarimax_parameter_query import get_params
         
 #    Split target variable into training/test set
     train, test = train_test_split(target_variable, n_test)
