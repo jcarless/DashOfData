@@ -1,5 +1,8 @@
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import psycopg2
 from psycopg2.extensions import AsIs
+from psycopg2.extras import execute_values
 from config import config
 import pandas
 from pandas import ExcelWriter
@@ -12,61 +15,65 @@ count = 0
 checksInsertedCount = 0
 itemsInsertedCount = 0
 coursesInsertedCount = 0
-errors=[]
-fail=False
 
 items = []
 courses = []
 checks = []
-courses_with_ids = []
-checks_with_ids = []
+
+def setItemIds():
+    i = 0
+    while i < len(items):
+        courseMatch = searchCourses(items[i]["check_id_temp"], items[i]["timestamp"], items[i]["course_type"], "", 0, 0)
+
+        items[i]["check_id"] = courseMatch["check_id"]
+        items[i]["course_id"] = courseMatch["course_id"]
+
+        del items[i]["course_type"]
+        del items[i]["check_id_temp"]
+
+        items[i] = tuple(items[i].values())
+
+        i += 1
 
 def searchChecks(checkNumber, timestamp, gross, calculate, newCheckNumber):
+    i = 0
     if calculate == 0:
-        # print("checkNumber: ", checkNumber)
-        # print("courseType: ", courseType)
-        for c in checks_with_ids:
-            if c['check_id_temp'] == checkNumber and c['timestamp'] == timestamp:
-                return c
+        while i < len(courses):
+            if courses[i]['check_id_temp'] == checkNumber and courses[i]['timestamp'] == timestamp:
+                return courses[i]
+            i+=1
 
     else:
-        for c in checks:
-            if c['check_id_temp'] == checkNumber and c['timestamp'] == timestamp:
+        while i < len(courses):
+            if courses[i]['check_id_temp'] == checkNumber and courses[i]['timestamp'] == timestamp:
                 if calculate == 1:
-                    c["total"] = round(c["total"] + float(gross), 2)
+                    courses[i]["total"] = round(courses[i]["total"] + float(gross), 2)
                     return False                    
                 if calculate == 2:
-                    c["check_id"] = newCheckNumber
-                    checks_with_ids.append(c)
-                    return c
+                    courses[i]["check_id"] = newCheckNumber
+                    return courses[i]
+            i+=1
     return True
 
 def searchCourses(checkNumber, timestamp, courseType, gross, calculate, course_id):
+    i = 0
     if calculate == 0:
-        # print("checkNumber: ", checkNumber)
-        # print("courseType: ", courseType)
-        for c in courses_with_ids:
-            if c['check_id_temp'] == checkNumber and c["course_type"] == courseType and c['timestamp'] == timestamp:
-                # print("Course with id again: ", c)
-                return c
-        print("YOU SHOULD HAVE FOUND A COURSE!")
-        print("================================")
-        print("================================")
-        print("================================")
-        print("================================")
-        print("================================")
+        while i < len(courses):
+            if courses[i]['check_id_temp'] == checkNumber and courses[i]["course_type"] == courseType and courses[i]['timestamp'] == timestamp:
+                return courses[i]
+            i += 1
+        raise Exception("YOU SHOULD HAVE FOUND A COURSE!")
 
     else:
-        for c in courses:
-            if c['check_id_temp'] == checkNumber and c["course_type"] == courseType:
+        while i < len(courses):
+            if courses[i]['check_id_temp'] == checkNumber and courses[i]["course_type"] == courseType:
                 if calculate == 1:
-                    c["total"] = round(c["total"] + float(gross), 2)
+                    courses[i]["total"] = round(courses[i]["total"] + float(gross), 2)
                     return False
                 if calculate == 2:
-                    c["course_id"] = course_id
-                    # print("Course added to array: ", c)
-                    courses_with_ids.append(c)
+                    courses[i]["course_id"] = course_id
                     return False
+            i+=1
     return True
 
 def insert_item(item):
@@ -118,7 +125,6 @@ def insert_check(item):
     return cur.fetchone()[0]
 
 def insert_course(item):
-    # print("COURSE: ", item["course_type"])
     sql = f"""INSERT INTO %s(check_id,course_type,total)
     VALUES(%s,%s,%s) RETURNING course_id"""
     try:
@@ -134,7 +140,7 @@ def insert_course(item):
 
     return cur.fetchone()[0]
 
-xls = ExcelFile('nydata_7.xlsx')
+xls = ExcelFile('nydata.xlsx')
 df = xls.parse(xls.sheet_names[0])
 
 for i in df.index:
@@ -157,7 +163,6 @@ for i in df.index:
         elif df["Course"][i] == "dessert":
             pass
         else:
-            # print("UNKNOWN COURSE TYPE CONVERTED TO OTHER: ", df["Course"][i])
             df["Course"][i] = "other"
 
     newCheck = searchChecks(df["Check_Number"][i], df["Seated"][i], df["Gross"][i], 1, "")
@@ -195,11 +200,11 @@ for i in df.index:
         courses.append(course)
 
     item = {
-        "item": df["Item"][i],
+        "item": df["Item"][i] if type(df["Item"][i]).__name__ == "str" else None,
         "gross": round(float(df["Gross"][i]), 2),
         "tax": round(float(str(df["Item Tax"][i]).replace("$", "")),2) if type(df["Item Tax"][i]).__name__ == "str" else 0.0,
         "timestamp": df["Seated"][i],
-        "price": round(float(df["Price"][i].replace("$", "").replace(",", "")), 2),
+        "price": round(float(str(df["Price"][i]).replace("$", "").replace(",", "")), 2),
         "vc": df["VC"][i] if type(df["VC"]).__name__ == "str" else None,
         "vc_note": df["VC_Note"][i],
         "vc_reason": df["VC_Reason"][i] if type(df["VC"]).__name__ == "str" else None,
@@ -208,7 +213,6 @@ for i in df.index:
         "check_id_temp": int(df["Check_Number"][i]),
         "course_type": df["Course"][i]
     }
-
     items.append(item)
     count = count + 1
     print("COUNT: ", count)
@@ -218,66 +222,62 @@ try:
     conn = psycopg2.connect(**params)
     cur = conn.cursor()
 except (Exception, psycopg2.DatabaseError) as error:
-    print("CONNECTION ERROR: ", error)
+    raise error
 finally:
-    for check in checks:
-        try:
-            check["check_id"] = insert_check(check)
-            searchChecks(check["check_id_temp"], check["timestamp"], "", 2, check["check_id"])
-            checksInsertedCount = checksInsertedCount + 1
-            print("checksInsertedCount: ", checksInsertedCount)
-        except Exception as error:
-            fail=True
-            print("CHECK ERROR: ", error)
-            print(check)
-            errors.append(error)
-
-    for course in courses:
-        try:
-            check = searchChecks(course["check_id_temp"], course["timestamp"], "", 0, "")
-            course["check_id"] = check["check_id"]
-            course_id = insert_course(course)
-            searchCourses(course["check_id_temp"], course["timestamp"], course["course_type"], "", 2, course_id)
-            coursesInsertedCount = coursesInsertedCount + 1
-            print("coursesInsertedCount: ", coursesInsertedCount)
-        except Exception as error:
-            fail=True
-            print("COURSE ERROR: ", error) 
-            print(course)
-            errors.append(error)  
-
-    for item in items:
-        try:
-            courseMatch = searchCourses(item["check_id_temp"], item["timestamp"], item["course_type"], "", 0, 0)
-            item["course_id"] = courseMatch["course_id"]
-            item["check_id"] = courseMatch["check_id"]
-            insert_item(item)
-            itemsInsertedCount = itemsInsertedCount + 1
-            print("itemsInsertedCount: ", itemsInsertedCount)
-        except Exception as error:
-            fail=True
-            print("ITEM ERROR: ", error)  
-            print(item)
-            errors.append(error)
-
     try:
-        if fail == False:
+        try:
+            for check in checks:
+                check["check_id"] = insert_check(check)
+                searchChecks(check["check_id_temp"], check["timestamp"], "", 2, check["check_id"])
+                checksInsertedCount = checksInsertedCount + 1
+                print("checksInsertedCount: ", checksInsertedCount)
+        except Exception as error:
+            print("CHECK ERROR: ", check) 
+            raise error
+
+        try:
+            for course in courses:
+                check = searchChecks(course["check_id_temp"], course["timestamp"], "", 0, "")
+                course["check_id"] = check["check_id"]
+                course_id = insert_course(course)
+                searchCourses(course["check_id_temp"], course["timestamp"], course["course_type"], "", 2, course_id)
+                coursesInsertedCount = coursesInsertedCount + 1
+                print("coursesInsertedCount: ", coursesInsertedCount)
+        except Exception as error:
+            print("COURSE ERROR: ", course) 
+            raise error
+
+        try:
+            setItemIds()
+            execute_values(cur,
+            """INSERT INTO items (item,
+            gross,
+            tax,
+            timestamp,
+            price,
+            vc,
+            vc_note,
+            vc_reason,
+            vc_total,
+            check_id,
+            course_id) VALUES %s""",
+            items)
+
+        except Exception as error:
+            print("ITEM ERROR: ", item)
+            raise error
+
+        try:
+            print("Committing changes...")
             conn.commit()
             cur.close()
-            print("SUCCESS")
-            print("ERRORS: ", errors)
-            print("NUMBER OF ERRORS: ", len(errors))
-            print("CHECKS: ", len(checks))
-            print("COURSES: ", len(courses))
-            print("ITEMS: ", len(items))
-        else:
-            print("FAIL")
-            print("Data not saved!")
-            print("ERRORS: ", errors)
-            print("NUMBER OF ERRORS: ", len(errors))
+        except (Exception, psycopg2.DatabaseError) as error:
+            raise Exception(error)
 
-    except (Exception, psycopg2.DatabaseError) as error:
-        print("Commit/Close error: ", error)
+    except Exception as error:
+        raise error
+
     finally:
         if conn is not None:
+            print("Closing connection.")
             conn.close()

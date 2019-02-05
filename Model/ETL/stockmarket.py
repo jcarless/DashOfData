@@ -1,3 +1,5 @@
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import psycopg2
 from alpha_vantage.timeseries import TimeSeries
 from psycopg2.extensions import AsIs
@@ -8,40 +10,48 @@ print("Getting data...")
 count = 0
 symbols = [
     {
-    "symbol": "IYK",
-    "index_name": "iShares U.S. Consumer Goods ETF"  
+    "symbol": "QQQ",
+    "index_name": "PowerShares QQQ Trust, Series 1"  
     },
     {
-    "symbol": "RHS",
-    "index_name": "Invesco S&P 500® Equal Weight Consumer Staples ETF"  
-    },    {
-    "symbol": "FSTA",
-    "index_name": "Fidelity MSCI Consumer Staples Index ETF"  
-    },    
-    {
-    "symbol": "VDC",
-    "index_name": "Vanguard Consumer Staples ETF"  
-    },    
-    {
-    "symbol": "FTXG",
-    "index_name": "First Trust Nasdaq Food & Beverage ETF"  
-    },    
-    {
-    "symbol": "ORG",
-    "index_name": "Organics ETF"  
-    },    
-    {
-    "symbol": "PBJ",
-    "index_name": "Invesco Dynamic Food & Beverage ETF"  
-    },    
-    {
-    "symbol": "XLY",
-    "index_name": "Consumer Discret Sel Sect SPDR ETF"  
+    "symbol": "RYDAX",
+    "index_name": "Rydex Dow Jones Industrial Average Fund Class A"  
     },
-    {
-    "symbol": "FXG",
-    "index_name": "First Trust Consumer Staples AlphaDEX Fund"  
-    }
+    # {
+    # "symbol": "IYK",
+    # "index_name": "iShares U.S. Consumer Goods ETF"  
+    # },
+    # {
+    # "symbol": "RHS",
+    # "index_name": "Invesco S&P 500® Equal Weight Consumer Staples ETF"  
+    # },    {
+    # "symbol": "FSTA",
+    # "index_name": "Fidelity MSCI Consumer Staples Index ETF"  
+    # },    
+    # {
+    # "symbol": "VDC",
+    # "index_name": "Vanguard Consumer Staples ETF"  
+    # },    
+    # {
+    # "symbol": "FTXG",
+    # "index_name": "First Trust Nasdaq Food & Beverage ETF"  
+    # },    
+    # {
+    # "symbol": "ORG",
+    # "index_name": "Organics ETF"  
+    # },    
+    # {
+    # "symbol": "PBJ",
+    # "index_name": "Invesco Dynamic Food & Beverage ETF"  
+    # },    
+    # {
+    # "symbol": "XLY",
+    # "index_name": "Consumer Discret Sel Sect SPDR ETF"  
+    # },
+    # {
+    # "symbol": "FXG",
+    # "index_name": "First Trust Consumer Staples AlphaDEX Fund"  
+    # }
 ]
 
 for symbol in symbols:
@@ -97,7 +107,7 @@ for symbol in symbols:
             count = count + 1
             print(f"{count} row inserted...")
     except Exception as error:
-        print(error)
+        raise error
     finally:
         conn.commit()
         cur.close()

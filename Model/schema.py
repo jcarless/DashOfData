@@ -2,6 +2,21 @@ import psycopg2
 from config import config
 
 # Enums
+account_type_enum = """CREATE TYPE account_type_enum AS ENUM (
+            'restaurant'
+            )
+            """
+model_category_enum = """CREATE TYPE model_category_enum AS ENUM (
+            'var',
+            'svar',
+            'mlp',
+            'lstm',
+            'arima',
+            'sarima',
+            'sarimax',
+            'holtwinter'
+            )
+            """
 condition_main_enum = "CREATE TYPE condition_main_enum AS ENUM ('clear', 'clouds', 'mist', 'haze', 'fog', 'smoke', 'dust', 'sand', 'drizzle', 'rain', 'squall', 'snow', 'thunderstorm', 'extreme')"
 check_type_enum = "CREATE TYPE check_type_enum AS ENUM ('table', 'tab', 'takeout')"
 status_enum = "CREATE TYPE status_enum AS ENUM ('open', 'closed')"
@@ -21,6 +36,11 @@ month_enum = """CREATE TYPE month_enum AS ENUM (
             'october', 
             'november', 
             'december'
+            )
+            """
+state_enum = """CREATE TYPE state_enum AS ENUM (
+            'ny',
+            'ct'
             )
             """
 course_type_enum = """CREATE TYPE course_type_enum AS ENUM (
@@ -43,6 +63,16 @@ vc_reason_enum = """CREATE TYPE vc_reason_enum AS ENUM (
             'manager',
             'staff food',
             'other'
+            )
+            """
+transaction_type_enum = """CREATE TYPE transaction_type_enum AS ENUM (
+            'bill',
+            'bill payment (check)',
+            'bill payment (credit card)',
+            'check',
+            'credit card credit',
+            'expense',
+            'vendor credit'
             )
             """
 
@@ -126,6 +156,56 @@ CREATE TABLE weather (
     )
 """
 
+food_services_gdp_Schema = """
+CREATE TABLE food_services_gdp (
+    gdp_id serial PRIMARY KEY,
+    state state_enum NOT NULL,
+    gdp NUMERIC NOT NULL,
+    date TIMESTAMP NOT NULL
+    )
+"""
+
+accounts_Schema = """
+CREATE TABLE accounts (
+    account_id serial PRIMARY KEY,
+    name TEXT,
+    address TEXT NOT NULL,
+    city TEXT NOT NULL,
+    state state_enum NOT NULL,
+    zip TEXT,
+    type account_type_enum
+    )
+"""
+
+model_parameters_Schema = """
+CREATE TABLE model_parameters (
+    parameter_id serial PRIMARY KEY,
+    model_category model_category_enum NOT NULL,
+    date TIMESTAMP NOT NULL,
+    p_ INTEGER,
+    d_ INTEGER,
+    q_ INTEGER,
+    P INTEGER,
+    D INTEGER,
+    Q INTEGER,
+    s INTEGER,
+    account_id INTEGER REFERENCES accounts (account_id)
+    )
+"""
+
+transactionSchema = """
+            CREATE TABLE transactions (
+                transaction_id serial PRIMARY KEY, 
+                account_id INTEGER REFERENCES accounts (account_id), 
+                transaction_type TEXT,
+                check_number TEXT,
+                payee TEXT,
+                transaction_category TEXT,
+                total NUMERIC,
+                timestamp TIMESTAMP
+                )
+            """
+
 course_check_id_index = "CREATE INDEX courses_check_fkey ON courses (check_id)"
 item_check_id_index = "CREATE INDEX items_check_fkey ON items (check_id)"
 item_course_id_index = "CREATE INDEX items_course_fkey ON items (course_id)"
@@ -141,34 +221,57 @@ def create_schema():
         # f"{weatherSchema}",
         # f"{quotesSchema}",
 
+        # GDP DATA
+        # "DROP TABLE food_services_gdp",
+        # "DROP TYPE state_enum",
+        # f"{state_enum}",
+        # f"{food_services_gdp_Schema}"
+
         #POS DATA
-        "DROP TABLE items",
-        "DROP TABLE courses",
-        "DROP TABLE checks",
-        "DROP TYPE status_enum",
-        "DROP TYPE tax_type_enum",
-        "DROP TYPE day_enum",
-        "DROP TYPE day_of_week_enum",
-        "DROP TYPE month_enum",
-        "DROP TYPE course_type_enum",
-        "DROP TYPE vc_enum",
-        "DROP TYPE vc_reason_enum",
-        "DROP TYPE check_type_enum",
-        f"{status_enum}",
-        f"{tax_type_enum}",
-        f"{day_enum}",
-        f"{day_of_week_enum}",
-        f"{month_enum}",
-        f"{course_type_enum}",
-        f"{vc_enum}",
-        f"{vc_reason_enum}",
-        f"{check_type_enum}",
-        f"{checkSchema}",
-        f"{courseSchema}",
-        f"{itemSchema}",
-        f"{course_check_id_index}",
-        f"{item_check_id_index}",
-        f"{item_course_id_index}"
+        # "DROP TABLE items",
+        # "DROP TABLE courses",
+        # "DROP TABLE checks",
+        # "DROP TYPE status_enum",
+        # "DROP TYPE tax_type_enum",
+        # "DROP TYPE day_enum",
+        # "DROP TYPE day_of_week_enum",
+        # "DROP TYPE month_enum",
+        # "DROP TYPE course_type_enum",
+        # "DROP TYPE vc_enum",
+        # "DROP TYPE vc_reason_enum",
+        # "DROP TYPE check_type_enum",
+        # f"{status_enum}",
+        # f"{tax_type_enum}",
+        # f"{day_enum}",
+        # f"{day_of_week_enum}",
+        # f"{month_enum}",
+        # f"{course_type_enum}",
+        # f"{vc_enum}",
+        # f"{vc_reason_enum}",
+        # f"{check_type_enum}",
+        # f"{checkSchema}",
+        # f"{courseSchema}",
+        # f"{itemSchema}",
+        # f"{course_check_id_index}",
+        # f"{item_check_id_index}",
+        # f"{item_course_id_index}",
+
+        # "DROP TABLE IF EXISTS model_parameters",
+        # "DROP TABLE IF EXISTS accounts",
+        # "DROP TYPE IF EXISTS account_type_enum",
+        # "DROP TYPE IF EXISTS model_category_enum",
+
+        # f"{account_type_enum}",
+        # f"{model_category_enum}",
+        # f"{accounts_Schema}",
+        # f"{model_parameters_Schema}",
+
+        # "DROP TABLE IF EXISTS transactionSchema",
+        # "DROP TYPE IF EXISTS transaction_type_enum",
+
+        # f"{transaction_type_enum}",
+        # f"{transactionSchema}",
+
         )
 
     conn = None
@@ -193,7 +296,6 @@ def create_schema():
 
         # commit the changes
         conn.commit()
-        pass
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:

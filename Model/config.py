@@ -6,7 +6,7 @@ except ImportError:
     
 import os
 
-def config(filename='database.ini', section='postgresql'):
+def config(filename='Model/database.ini', section='postgresql'):
     if os.path.isfile(filename):
         # create a parser
         parser = ConfigParser()
