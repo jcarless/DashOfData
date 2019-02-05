@@ -65,6 +65,16 @@ vc_reason_enum = """CREATE TYPE vc_reason_enum AS ENUM (
             'other'
             )
             """
+transaction_type_enum = """CREATE TYPE transaction_type_enum AS ENUM (
+            'bill',
+            'bill payment (check)',
+            'bill payment (credit card)',
+            'check',
+            'credit card credit',
+            'expense',
+            'vendor credit'
+            )
+            """
 
 checkSchema = """
             CREATE TABLE checks (
@@ -183,6 +193,19 @@ CREATE TABLE model_parameters (
     )
 """
 
+transactionSchema = """
+            CREATE TABLE transactions (
+                transaction_id serial PRIMARY KEY, 
+                account_id INTEGER REFERENCES accounts (account_id), 
+                transaction_type TEXT,
+                check_number INT,
+                payee TEXT,
+                transaction_category TEXT,
+                total NUMERIC,
+                timestamp TIMESTAMP
+                )
+            """
+
 course_check_id_index = "CREATE INDEX courses_check_fkey ON courses (check_id)"
 item_check_id_index = "CREATE INDEX items_check_fkey ON items (check_id)"
 item_course_id_index = "CREATE INDEX items_course_fkey ON items (course_id)"
@@ -242,6 +265,12 @@ def create_schema():
         # f"{model_category_enum}",
         # f"{accounts_Schema}",
         # f"{model_parameters_Schema}",
+
+        # "DROP TABLE IF EXISTS transactionSchema",
+        # "DROP TYPE IF EXISTS transaction_type_enum",
+
+        # f"{transaction_type_enum}",
+        # f"{transactionSchema}",
 
         )
 
