@@ -198,7 +198,7 @@ transactionSchema = """
                 transaction_id serial PRIMARY KEY, 
                 account_id INTEGER REFERENCES accounts (account_id), 
                 transaction_type TEXT,
-                check_number INT,
+                check_number TEXT,
                 payee TEXT,
                 transaction_category TEXT,
                 total NUMERIC,
