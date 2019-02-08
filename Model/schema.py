@@ -206,13 +206,26 @@ transactionSchema = """
                 )
             """
 
+modelForecastsSchema = """
+            CREATE TABLE model_forecasts (
+                forecast_id serial PRIMARY KEY, 
+                account_id INTEGER REFERENCES accounts (account_id), 
+                model model_category_enum NOT NULL,
+                guests INTEGER,
+                sales NUMERIC,
+                forecast_date TIMESTAMP,
+                date_produced TIMESTAMP
+                )
+            """
+
 course_check_id_index = "CREATE INDEX courses_check_fkey ON courses (check_id)"
 item_check_id_index = "CREATE INDEX items_check_fkey ON items (check_id)"
 item_course_id_index = "CREATE INDEX items_course_fkey ON items (course_id)"
 
+
 def create_schema():
     commands = (
-        "CREATE SCHEMA IF NOT EXISTS dod",
+        # "CREATE SCHEMA IF NOT EXISTS dod",
 
         # "DROP TABLE weather",
         # "DROP TABLE quotes",
@@ -272,7 +285,9 @@ def create_schema():
         # f"{transaction_type_enum}",
         # f"{transactionSchema}",
 
-        )
+        # "DROP TABLE IF EXISTS modelForecastsSchema",
+        # f"{modelForecastsSchema}",
+    )
 
     conn = None
 
