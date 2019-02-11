@@ -76,6 +76,35 @@ transaction_type_enum = """CREATE TYPE transaction_type_enum AS ENUM (
             )
             """
 
+master_category_enum = """CREATE TYPE master_category_enum AS ENUM (
+            'balance sheet',
+            'controllable expenses',
+            'cost of sales',
+            'interest/depreciation',
+            'occupancy costs',
+            'other',
+            'payments'
+            )
+            """
+
+key_category_enum = """CREATE TYPE key_category_enum AS ENUM (
+            'beverages',
+            'debt',
+            'cost of sale',
+            'direct operating expenses',
+            'food',
+            'general & administrative expenses',
+            'loans & interest expense',
+            'marketing',
+            'payments',
+            'rent',
+            'repairs & maintenance',
+            'salaries & wages',
+            'taxes',
+            'utilities'
+            )
+            """
+
 checkSchema = """
             CREATE TABLE checks (
                 check_id serial PRIMARY KEY, 
@@ -199,6 +228,8 @@ transactionSchema = """
                 account_id INTEGER REFERENCES accounts (account_id), 
                 transaction_type TEXT,
                 check_number TEXT,
+                master_category master_category_enum,
+                key_category key_category_enum,
                 payee TEXT,
                 transaction_category TEXT,
                 total NUMERIC,
@@ -210,6 +241,7 @@ modelForecastsSchema = """
             CREATE TABLE model_forecasts (
                 forecast_id serial PRIMARY KEY, 
                 account_id INTEGER REFERENCES accounts (account_id), 
+                parameter_id INTEGER REFERENCES model_parameters (parameter_id),
                 model model_category_enum NOT NULL,
                 guests INTEGER,
                 sales NUMERIC,
@@ -279,13 +311,18 @@ def create_schema():
         # f"{accounts_Schema}",
         # f"{model_parameters_Schema}",
 
-        # "DROP TABLE IF EXISTS transactionSchema",
+        # "DROP TABLE IF EXISTS transactions",
         # "DROP TYPE IF EXISTS transaction_type_enum",
+        # "DROP TYPE IF EXISTS master_category_enum",
+        # "DROP TYPE IF EXISTS key_category_enum",
+
 
         # f"{transaction_type_enum}",
+        # f"{master_category_enum}",
+        # f"{key_category_enum}",
         # f"{transactionSchema}",
 
-        # "DROP TABLE IF EXISTS modelForecastsSchema",
+        # "DROP TABLE IF EXISTS model_forecasts",
         # f"{modelForecastsSchema}",
     )
 

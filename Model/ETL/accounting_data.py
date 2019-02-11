@@ -13,16 +13,17 @@ count = 0
 
 df = pd.read_csv(
     '/Users/jeromecarless/Documents/NYU/Capstone/DashOfData/flny_accounting_data.csv',
-    usecols=["Date", "Type", "No.", "Payee", "Category", "Total"])
+    usecols=["Date", "Type", "No.", "Payee", "Category", "Total", "Master Category", "Key Category"])
 
 
 df["Total"] = df["Total"].str.replace(",", "")
-# print("TEST: ", df["Total"])
 
 df["Type"] = df["Type"].str.lower()
 df["Category"] = df["Category"].str.lower()
 df["Total"] = pd.to_numeric(df["Total"])
-# df["Date"] = pd.to_datetime(df["Date"])
+df["Master Category"] = df["Master Category"].str.lower()
+df["Key Category"] = df["Key Category"].str.lower()
+df["Master Category"][df["Master Category"] == "int. & dep."] = "interest/depreciation"
 
 transactions = []
 
@@ -35,7 +36,9 @@ for i in df.index:
         "payee": df["Payee"][i],
         "transaction_category": df["Category"][i],
         "total": df["Total"][i],
-        "timestamp": df["Date"][i]
+        "timestamp": df["Date"][i],
+        "master_category": df["Master Category"][i],
+        "key_category": df["Key Category"][i]
     }
 
     # print("TRANSACTION===============")
@@ -51,19 +54,25 @@ try:
         %s(account_id,
         transaction_type,
         check_number,
+        master_category,
+        key_category,
         payee,
         transaction_category,
         total,
         timestamp)
-        VALUES(%s,%s,%s,%s,%s,%s,%s)"""
+        VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
 
         try:
-            # print("INT: ", transaction["account_id"][i])
+            # print("TRANSACTION===============")
+            # print(transaction)            
+            
             cur.execute(sql, 
             (AsIs('transactions'), 
             transaction["account_id"],
             transaction["transaction_type"], 
             transaction["check_number"],
+            transaction["master_category"],
+            transaction["key_category"],
             transaction["payee"],
             transaction["transaction_category"],
             transaction["total"],

@@ -1,14 +1,16 @@
-#sarimax_model(target_variable: DataFrame containing a series of the variable to be predicted, 
-#    exog_variables: List of DataFrames, each containing an external variable series to include in modeling,  
-#    start_date: YYYY-M-D Start of date range used to train/test data, 
-#    end_date: YYYY-M-D End of date range used to train/test data, 
-#    split: numeric training/test split decimal ex 0.7
-#    plot: boolean Should a graph of the results be plotted?)
+#sarimax_model(target_variable: DataFrame - Contains a single column of the variable to be predicted, 
+#    exog_variables: List - List of DataFrames, each containing an external variable series to include in modeling,  
+#    start_date: YYYY-M-D - Start of date range used to train/test data, 
+#    end_date: YYYY-M-D - End of date range used to train/test data, 
+#    split: Numeric - training/test split decimal ex 0.7,
+#    plot: Boolean - Should a graph of the results be plotted?,
+#    save: Boolean - Should the results be saved?,
+#    account_id: Integer - account_id of the business the model is being run on)
 
 def train_test_split(data, n_test):
 	return data[:-n_test], data[-n_test:]
 
-def sarimax_model(target_variable, exog_variables, start_date, end_date, n_test, plot):
+def sarimax_model(target_variable, exog_variables, start_date, end_date, n_test, plot, save, account_id):
     import os, sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from sklearn.metrics import mean_squared_error
@@ -17,6 +19,7 @@ def sarimax_model(target_variable, exog_variables, start_date, end_date, n_test,
     import numpy as np
     import pandas as pd
     from sarimax_parameter_query import get_params
+    from save_forecast import save_forecast
         
 #    Split target variable into training/test set
     train, test = train_test_split(target_variable, n_test)
@@ -38,7 +41,7 @@ def sarimax_model(target_variable, exog_variables, start_date, end_date, n_test,
     exog_test = np.column_stack(exog_variables_test)
     
     #Get best model configuration
-    p,d,q,P,D,Q,s = get_params("sarimax", 52, 1)
+    p,d,q,P,D,Q,s,parameter_id = get_params("sarimax", 7, account_id)
         
     #Fit the model
     y_hat_avg = test.copy()
@@ -46,7 +49,7 @@ def sarimax_model(target_variable, exog_variables, start_date, end_date, n_test,
                           exog=exog_train, 
                           enforce_invertibility = False, 
                           order=(p,d,q), 
-                          seasonal_order=(P,D,Q,s)).fit(maxiter=200)
+                          seasonal_order=(P,D,Q,s)).fit(maxiter=50)
     
     #Create prediction and add to dataframe
     y_hat_avg['SARIMA'] = fit1.predict(exog=exog_test, start=start_date, end=end_date, dynamic=False)
@@ -68,6 +71,11 @@ def sarimax_model(target_variable, exog_variables, start_date, end_date, n_test,
     #Calculate RMS   
     rmse_test = sqrt(mean_squared_error(test[test.columns[0]], y_hat_avg.SARIMA))
 #    rmse_train = sqrt(mean_squared_error(train[train.columns[0]], y_hat_avg.SARIMA))
+        
+    #save forecast
+    if(save == True): 
+        save_forecast(y_hat_avg['SARIMA'], "sarimax", account_id, parameter_id)
+    
     return { "rmse_test": rmse_test, 
             "rmse_train": "",
             "fit": fit1, 

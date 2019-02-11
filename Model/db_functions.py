@@ -14,7 +14,9 @@ def db_connection():
     except (Exception, psycopg2.DatabaseError) as error:
         raise error
         
-def db_close(conn=None):
+def db_close(conn=None, cur=None):
     #End the session
+    if cur is not None:
+        cur.close()
     if conn is not None:
         conn.close()
