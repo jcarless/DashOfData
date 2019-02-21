@@ -1,3 +1,5 @@
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pandas
 from pandas import ExcelWriter
 from pandas import ExcelFile
@@ -10,7 +12,7 @@ error=False
 # xls = ExcelFile('/Users/jeromecarless/Documents/NYU/Capstone/DashOfData/be544f711aca99913984c372ec9fd114.xls')
 # df = xls.parse(xls.sheet_names[0])
 
-df = pandas.read_csv('/Users/jeromecarless/Documents/NYU/Capstone/DashOfData/be544f711aca99913984c372ec9fd114.csv')
+df = pandas.read_csv('/Users/jeromecarless/Documents/NYU/Capstone/DashOfData/ctweatherdata.csv')
 
 count=0
 conn = None

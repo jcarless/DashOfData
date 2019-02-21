@@ -140,7 +140,7 @@ def insert_course(item):
 
     return cur.fetchone()[0]
 
-xls = ExcelFile('nydata.xlsx')
+xls = ExcelFile('ctdata-2.xlsx')
 df = xls.parse(xls.sheet_names[0])
 
 for i in df.index:
@@ -174,6 +174,7 @@ for i in df.index:
             df["Check_Type"][i] = "takeout"  
         
         check = {
+            "account_id": 2,
             "check_id_temp": int(df["Check_Number"][i]),
             "check_type": str(df["Check_Type"][i].lower()),
             "guests": int(df["Guests"][i]),
