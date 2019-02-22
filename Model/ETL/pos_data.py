@@ -101,8 +101,8 @@ def insert_item(item):
     return
 
 def insert_check(item):
-    sql = f"""INSERT INTO %s(check_type,guests,timestamp,server,status,tax_type,total,day,day_of_week,month,year)
-    VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING check_id"""
+    sql = f"""INSERT INTO %s(check_type,guests,timestamp,server,status,tax_type,total,day,day_of_week,month,year,account_id)
+    VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING check_id"""
     try:
         cur.execute(sql, 
         (AsIs('checks'), 
@@ -116,7 +116,8 @@ def insert_check(item):
         item["day"],
         item["day_of_week"],
         item["month"],
-        item["year"])
+        item["year"],
+        item["account_id"])
         )
 
     except (Exception, psycopg2.DatabaseError) as error:
