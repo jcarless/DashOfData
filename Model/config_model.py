@@ -12,5 +12,5 @@ cols = [
         "temp_log_diff"
         ]
 
-start_date = '2014-03-31'
-end_date = '2018-6-29'
+start_date = '2018-02-01'
+end_date = '2018-05-01'
