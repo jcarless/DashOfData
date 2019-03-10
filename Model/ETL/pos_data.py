@@ -13,7 +13,7 @@ import math
 
 conn = None
 account_id = 2
-fileName = "test_data.xlsx"
+fileName = "ctdata_9.xlsx"
 
 count = 0
 checksInsertedCount = 0
@@ -74,6 +74,8 @@ def searchChecks(checkNumber, timestamp, gross, calculate, newCheckNumber):
                             check["timestamp"] == timestamp
                             and check["check_id_temp"] == checkNumber
                         ):
+                            # print("CHECK TOTAL: ", check["total"])
+                            # print("GROSS: ", float(gross))
                             check["total"] = round(
                                 check["total"] + float(gross), 2
                             )
@@ -206,10 +208,11 @@ df = xls.parse(xls.sheet_names[0])
 for i in df.index:
 
     if type(df["Gross"][i]).__name__ == "str":
-        df["Gross"][i] = 0
-
-    if math.isnan(df["Gross"][i]):
+        df["Gross"][i] = df["Gross"][i].replace("$", "").replace(",", "")
+    else:
         df["Gross"][i] = 0.0
+
+    # print("GROSS: ", df["Gross"][i])
 
     if type(df["Course"][i]).__name__ != "str":
         df["Course"][i] = "other"
@@ -253,7 +256,7 @@ for i in df.index:
             "server": df["Server"][i],
             "status": df["Status"][i].lower(),
             "tax_type": df["Tax Type"][i].lower(),
-            "total": df["Gross"][i],
+            "total": float(df["Gross"][i]),
             "day": df["Day"][i],
             "day_of_week": str(df["Day of the Week"][i]),
             "month": df["Seated"][i].strftime("%B").lower(),

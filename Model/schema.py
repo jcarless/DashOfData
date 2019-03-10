@@ -118,7 +118,8 @@ checkSchema = """
                 day day_enum,
                 day_of_week day_of_week_enum,
                 month month_enum,
-                year INTEGER NOT NULL
+                year INTEGER NOT NULL,
+                account_id INTEGER NOT NULL
                 )
             """
 
@@ -128,7 +129,8 @@ courseSchema = """
                     course_type course_type_enum,
                     total NUMERIC NOT NULL,
                     check_id INTEGER NOT NULL,
-                    FOREIGN KEY (check_id) REFERENCES checks (check_id)
+                    FOREIGN KEY (check_id) REFERENCES checks (check_id),
+                    account_id INTEGER NOT NULL
                 )
             """
 
@@ -145,7 +147,8 @@ itemSchema = """
                     vc_reason vc_reason_enum,
                     vc_total NUMERIC,
                     course_id INTEGER REFERENCES courses (course_id),
-                    check_id INTEGER REFERENCES checks (check_id)
+                    check_id INTEGER REFERENCES checks (check_id),
+                    account_id INTEGER NOT NULL
                 )
             """
 
@@ -239,8 +242,8 @@ transactionSchema = """
 
 modelForecastsSchema = """
             CREATE TABLE model_forecasts (
-                forecast_id serial PRIMARY KEY, 
-                account_id INTEGER REFERENCES accounts (account_id), 
+                forecast_id serial PRIMARY KEY,
+                account_id INTEGER REFERENCES accounts (account_id),
                 parameter_id INTEGER REFERENCES model_parameters (parameter_id),
                 model model_category_enum NOT NULL,
                 guests INTEGER,
@@ -272,7 +275,7 @@ def create_schema():
         # f"{state_enum}",
         # f"{food_services_gdp_Schema}"
 
-        #POS DATA
+        # # POS DATA
         # "DROP TABLE items",
         # "DROP TABLE courses",
         # "DROP TABLE checks",
