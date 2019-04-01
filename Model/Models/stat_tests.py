@@ -1,13 +1,28 @@
 import os, sys
 sys.path.append("Model/PreProcessing")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from posData_preprocessing import posData
+from posData_preprocessing import get_posData
+from weatherData_preprocessing import get_weatherData
 import indicies_preprocessing as ind
 from econData_preprocessing import econData
 import pandas as pd
 from lags import lags
 from kpss_test import kpss_test
 from adf_test import adf_test
+
+start_date = '2018-02-01'
+end_date = '2018-05-01'
+
+# NY
+account_id = 1
+city_id = 5128581
+
+## CT
+# account_id = 2
+# city_id = 4843564
+
+posData = get_posData(account_id, start_date, end_date)
+weatherData = get_weatherData(city_id, start_date, end_date)
 
 print("KPSS TEST: ", kpss_test(posData["guests_diff"], plot = False))
 print("ADF TEST: ", adf_test(posData["guests_diff"]))
@@ -16,15 +31,15 @@ print("ADF TEST: ", adf_test(posData["guests_diff"]))
 df = pd.DataFrame()
 df["guests_log_diff"] = posData['guests_log_diff']
 df["guests_log"] = posData['guests_log']
-df["temp"] = posData["temp"]
-df["severity"] = posData["severity"]
+df["temp"] = weatherData["temp"]
+df["severity"] = weatherData["severity"]
 df["GDP"] = econData["gdp"]
 df["total_sales"] = posData['total_sales']
-df["humidity"] = posData['humidity']
+df["humidity"] = weatherData['humidity']
 df["guests_diff"] = posData['guests_diff']
-df["temp_diff"] = posData['temp_diff']
+df["temp_diff"] = weatherData['temp_diff']
 df["guests_diff_percent"] = posData['guests_diff_percent']
-df["temp_diff_percent"] = posData['temp_diff_percent']
+df["temp_diff_percent"] = weatherData['temp_diff_percent']
 
 QQQ_lag = lags(ind.QQQ, "QQQ")
 IYK_lag = lags(ind.IYK, "IYK")

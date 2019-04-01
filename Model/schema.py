@@ -76,6 +76,35 @@ transaction_type_enum = """CREATE TYPE transaction_type_enum AS ENUM (
             )
             """
 
+master_category_enum = """CREATE TYPE master_category_enum AS ENUM (
+            'balance sheet',
+            'controllable expenses',
+            'cost of sales',
+            'interest/depreciation',
+            'occupancy costs',
+            'other',
+            'payments'
+            )
+            """
+
+key_category_enum = """CREATE TYPE key_category_enum AS ENUM (
+            'beverages',
+            'debt',
+            'cost of sale',
+            'direct operating expenses',
+            'food',
+            'general & administrative expenses',
+            'loans & interest expense',
+            'marketing',
+            'payments',
+            'rent',
+            'repairs & maintenance',
+            'salaries & wages',
+            'taxes',
+            'utilities'
+            )
+            """
+
 checkSchema = """
             CREATE TABLE checks (
                 check_id serial PRIMARY KEY, 
@@ -89,7 +118,8 @@ checkSchema = """
                 day day_enum,
                 day_of_week day_of_week_enum,
                 month month_enum,
-                year INTEGER NOT NULL
+                year INTEGER NOT NULL,
+                account_id INTEGER NOT NULL
                 )
             """
 
@@ -99,7 +129,8 @@ courseSchema = """
                     course_type course_type_enum,
                     total NUMERIC NOT NULL,
                     check_id INTEGER NOT NULL,
-                    FOREIGN KEY (check_id) REFERENCES checks (check_id)
+                    FOREIGN KEY (check_id) REFERENCES checks (check_id),
+                    account_id INTEGER NOT NULL
                 )
             """
 
@@ -116,7 +147,8 @@ itemSchema = """
                     vc_reason vc_reason_enum,
                     vc_total NUMERIC,
                     course_id INTEGER REFERENCES courses (course_id),
-                    check_id INTEGER REFERENCES checks (check_id)
+                    check_id INTEGER REFERENCES checks (check_id),
+                    account_id INTEGER NOT NULL
                 )
             """
 
@@ -199,6 +231,8 @@ transactionSchema = """
                 account_id INTEGER REFERENCES accounts (account_id), 
                 transaction_type TEXT,
                 check_number TEXT,
+                master_category master_category_enum,
+                key_category key_category_enum,
                 payee TEXT,
                 transaction_category TEXT,
                 total NUMERIC,
@@ -206,13 +240,27 @@ transactionSchema = """
                 )
             """
 
+modelForecastsSchema = """
+            CREATE TABLE model_forecasts (
+                forecast_id serial PRIMARY KEY,
+                account_id INTEGER REFERENCES accounts (account_id),
+                parameter_id INTEGER REFERENCES model_parameters (parameter_id),
+                model model_category_enum NOT NULL,
+                guests INTEGER,
+                sales NUMERIC,
+                forecast_date TIMESTAMP,
+                date_produced TIMESTAMP
+                )
+            """
+
 course_check_id_index = "CREATE INDEX courses_check_fkey ON courses (check_id)"
 item_check_id_index = "CREATE INDEX items_check_fkey ON items (check_id)"
 item_course_id_index = "CREATE INDEX items_course_fkey ON items (course_id)"
 
+
 def create_schema():
     commands = (
-        "CREATE SCHEMA IF NOT EXISTS dod",
+        # "CREATE SCHEMA IF NOT EXISTS dod",
 
         # "DROP TABLE weather",
         # "DROP TABLE quotes",
@@ -227,7 +275,7 @@ def create_schema():
         # f"{state_enum}",
         # f"{food_services_gdp_Schema}"
 
-        #POS DATA
+        # # POS DATA
         # "DROP TABLE items",
         # "DROP TABLE courses",
         # "DROP TABLE checks",
@@ -266,13 +314,20 @@ def create_schema():
         # f"{accounts_Schema}",
         # f"{model_parameters_Schema}",
 
-        # "DROP TABLE IF EXISTS transactionSchema",
+        # "DROP TABLE IF EXISTS transactions",
         # "DROP TYPE IF EXISTS transaction_type_enum",
+        # "DROP TYPE IF EXISTS master_category_enum",
+        # "DROP TYPE IF EXISTS key_category_enum",
+
 
         # f"{transaction_type_enum}",
+        # f"{master_category_enum}",
+        # f"{key_category_enum}",
         # f"{transactionSchema}",
 
-        )
+        # "DROP TABLE IF EXISTS model_forecasts",
+        # f"{modelForecastsSchema}",
+    )
 
     conn = None
 

@@ -1,4 +1,5 @@
 import os, sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import psycopg2
 from psycopg2.extensions import AsIs
@@ -9,7 +10,10 @@ from pandas import ExcelWriter
 from pandas import ExcelFile
 import uuid
 import math
+
 conn = None
+account_id = 2
+fileName = "ctdata_9.xlsx"
 
 count = 0
 checksInsertedCount = 0
@@ -20,10 +24,18 @@ items = []
 courses = []
 checks = []
 
+
 def setItemIds():
     i = 0
     while i < len(items):
-        courseMatch = searchCourses(items[i]["check_id_temp"], items[i]["timestamp"], items[i]["course_type"], "", 0, 0)
+        courseMatch = searchCourses(
+            items[i]["check_id_temp"],
+            items[i]["timestamp"],
+            items[i]["course_type"],
+            "",
+            0,
+            0,
+        )
 
         items[i]["check_id"] = courseMatch["check_id"]
         items[i]["course_id"] = courseMatch["course_id"]
@@ -35,64 +47,102 @@ def setItemIds():
 
         i += 1
 
+
 def searchChecks(checkNumber, timestamp, gross, calculate, newCheckNumber):
     i = 0
     if calculate == 0:
         while i < len(courses):
-            if courses[i]['check_id_temp'] == checkNumber and courses[i]['timestamp'] == timestamp:
+            if (
+                courses[i]["check_id_temp"] == checkNumber
+                and courses[i]["timestamp"] == timestamp
+            ):
                 return courses[i]
-            i+=1
+            i += 1
 
     else:
         while i < len(courses):
-            if courses[i]['check_id_temp'] == checkNumber and courses[i]['timestamp'] == timestamp:
+            if (
+                courses[i]["check_id_temp"] == checkNumber
+                and courses[i]["timestamp"] == timestamp
+            ):
                 if calculate == 1:
-                    courses[i]["total"] = round(courses[i]["total"] + float(gross), 2)
-                    return False                    
+                    courses[i]["total"] = round(
+                        courses[i]["total"] + float(gross), 2
+                    )
+                    for check in checks:
+                        if (
+                            check["timestamp"] == timestamp
+                            and check["check_id_temp"] == checkNumber
+                        ):
+                            # print("CHECK TOTAL: ", check["total"])
+                            # print("GROSS: ", float(gross))
+                            check["total"] = round(
+                                check["total"] + float(gross), 2
+                            )
+
+                    return False
                 if calculate == 2:
                     courses[i]["check_id"] = newCheckNumber
                     return courses[i]
-            i+=1
+            i += 1
     return True
 
-def searchCourses(checkNumber, timestamp, courseType, gross, calculate, course_id):
+
+def searchCourses(
+    checkNumber, timestamp, courseType, gross, calculate, course_id
+):
     i = 0
     if calculate == 0:
         while i < len(courses):
-            if courses[i]['check_id_temp'] == checkNumber and courses[i]["course_type"] == courseType and courses[i]['timestamp'] == timestamp:
+            if (
+                courses[i]["check_id_temp"] == checkNumber
+                and courses[i]["course_type"] == courseType
+                and courses[i]["timestamp"] == timestamp
+            ):
                 return courses[i]
             i += 1
         raise Exception("YOU SHOULD HAVE FOUND A COURSE!")
 
     else:
         while i < len(courses):
-            if courses[i]['check_id_temp'] == checkNumber and courses[i]["course_type"] == courseType:
+            if (
+                courses[i]["check_id_temp"] == checkNumber
+                and courses[i]["course_type"] == courseType
+            ):
                 if calculate == 1:
-                    courses[i]["total"] = round(courses[i]["total"] + float(gross), 2)
+                    courses[i]["total"] = round(
+                        courses[i]["total"] + float(gross), 2
+                    )
                     return False
                 if calculate == 2:
                     courses[i]["course_id"] = course_id
                     return False
-            i+=1
+            i += 1
     return True
 
+
 def insert_item(item):
-    sql = f"""INSERT INTO %s(item,gross,tax,timestamp,price,vc,vc_note,vc_reason,vc_total,check_id,course_id)
-    VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+    sql = f"""INSERT INTO %s(item,gross,tax,timestamp,price,vc,vc_note,
+    vc_reason,vc_total,check_id,course_id,account_id)
+    VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
     try:
-        cur.execute(sql, 
-        (AsIs('items'), 
-        item["item"], 
-        item["gross"],
-        item["tax"],
-        item["timestamp"],
-        item["price"],
-        item["vc"],
-        item["vc_note"],
-        item["vc_reason"],
-        item["vc_total"],
-        item["check_id"],
-        item["course_id"])
+        cur.execute(
+            sql,
+            (
+                AsIs("items"),
+                item["item"],
+                item["gross"],
+                item["tax"],
+                item["timestamp"],
+                item["price"],
+                item["vc"],
+                item["vc_note"],
+                item["vc_reason"],
+                item["vc_total"],
+                item["check_id"],
+                item["course_id"],
+                account_id,
+            ),
         )
 
     except (Exception, psycopg2.DatabaseError) as error:
@@ -100,23 +150,29 @@ def insert_item(item):
 
     return
 
-def insert_check(item):
-    sql = f"""INSERT INTO %s(check_type,guests,timestamp,server,status,tax_type,total,day,day_of_week,month,year)
-    VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING check_id"""
+
+def insert_check(item, cur):
+    sql = f"""INSERT INTO %s(check_type,guests,timestamp,server,status,
+    tax_type,total,day,day_of_week,month,year,account_id)
+    VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING check_id"""
     try:
-        cur.execute(sql, 
-        (AsIs('checks'), 
-        item["check_type"],
-        item["guests"],
-        item["timestamp"],
-        item["server"],
-        item["status"],
-        item["tax_type"],
-        item["total"],
-        item["day"],
-        item["day_of_week"],
-        item["month"],
-        item["year"])
+        cur.execute(
+            sql,
+            (
+                AsIs("checks"),
+                item["check_type"],
+                item["guests"],
+                item["timestamp"],
+                item["server"],
+                item["status"],
+                item["tax_type"],
+                item["total"],
+                item["day"],
+                item["day_of_week"],
+                item["month"],
+                item["year"],
+                account_id,
+            ),
         )
 
     except (Exception, psycopg2.DatabaseError) as error:
@@ -124,15 +180,20 @@ def insert_check(item):
 
     return cur.fetchone()[0]
 
-def insert_course(item):
-    sql = f"""INSERT INTO %s(check_id,course_type,total)
-    VALUES(%s,%s,%s) RETURNING course_id"""
+
+def insert_course(item, cur):
+    sql = f"""INSERT INTO %s(check_id,course_type,total,account_id)
+    VALUES(%s,%s,%s,%s) RETURNING course_id"""
     try:
-        cur.execute(sql, 
-        (AsIs('courses'), 
-        item["check_id"], 
-        item["course_type"],
-        item["total"])
+        cur.execute(
+            sql,
+            (
+                AsIs("courses"),
+                item["check_id"],
+                item["course_type"],
+                item["total"],
+                account_id,
+            ),
         )
 
     except (Exception, psycopg2.DatabaseError) as error:
@@ -140,13 +201,18 @@ def insert_course(item):
 
     return cur.fetchone()[0]
 
-xls = ExcelFile('nydata.xlsx')
+
+xls = ExcelFile(fileName)
 df = xls.parse(xls.sheet_names[0])
 
 for i in df.index:
 
-    if math.isnan(df["Gross"][i]):
+    if type(df["Gross"][i]).__name__ == "str":
+        df["Gross"][i] = df["Gross"][i].replace("$", "").replace(",", "")
+    else:
         df["Gross"][i] = 0.0
+
+    # print("GROSS: ", df["Gross"][i])
 
     if type(df["Course"][i]).__name__ != "str":
         df["Course"][i] = "other"
@@ -165,14 +231,23 @@ for i in df.index:
         else:
             df["Course"][i] = "other"
 
-    newCheck = searchChecks(df["Check_Number"][i], df["Seated"][i], df["Gross"][i], 1, "")
-    newCourse = searchCourses(df["Check_Number"][i],df["Seated"][i], df["Course"][i], df["Gross"][i], 1, 0)
+    newCheck = searchChecks(
+        df["Check_Number"][i], df["Seated"][i], df["Gross"][i], 1, ""
+    )
+    newCourse = searchCourses(
+        df["Check_Number"][i],
+        df["Seated"][i],
+        df["Course"][i],
+        df["Gross"][i],
+        1,
+        0,
+    )
 
-    if newCheck == True:
+    if newCheck is True:
 
         if df["Check_Type"][i].lower() == "to go":
-            df["Check_Type"][i] = "takeout"  
-        
+            df["Check_Type"][i] = "takeout"
+
         check = {
             "check_id_temp": int(df["Check_Number"][i]),
             "check_type": str(df["Check_Type"][i].lower()),
@@ -181,37 +256,50 @@ for i in df.index:
             "server": df["Server"][i],
             "status": df["Status"][i].lower(),
             "tax_type": df["Tax Type"][i].lower(),
-            "total": df["Gross"][i],
+            "total": float(df["Gross"][i]),
             "day": df["Day"][i],
             "day_of_week": str(df["Day of the Week"][i]),
             "month": df["Seated"][i].strftime("%B").lower(),
-            "year": int(df["Seated"][i].year)
+            "year": int(df["Seated"][i].year),
         }
         checks.append(check)
 
-    if newCourse == True:
+    if newCourse is True:
 
         course = {
             "check_id_temp": int(df["Check_Number"][i]),
             "course_type": df["Course"][i],
-            "total": round(float(df["Gross"][i]),2),
-            "timestamp": df["Seated"][i]
+            "total": round(float(df["Gross"][i]), 2),
+            "timestamp": df["Seated"][i],
         }
         courses.append(course)
 
     item = {
-        "item": df["Item"][i] if type(df["Item"][i]).__name__ == "str" else None,
+        "item": df["Item"][i]
+        if type(df["Item"][i]).__name__ == "str"
+        else None,
         "gross": round(float(df["Gross"][i]), 2),
-        "tax": round(float(str(df["Item Tax"][i]).replace("$", "")),2) if type(df["Item Tax"][i]).__name__ == "str" else 0.0,
+        "tax": round(float(str(df["Item Tax"][i]).replace("$", "")), 2)
+        if type(df["Item Tax"][i]).__name__ == "str"
+        else 0.0,
         "timestamp": df["Seated"][i],
-        "price": round(float(str(df["Price"][i]).replace("$", "").replace(",", "")), 2),
+        "price": round(
+            float(str(df["Price"][i]).replace("$", "").replace(",", "")), 2
+        ),
         "vc": df["VC"][i] if type(df["VC"]).__name__ == "str" else None,
         "vc_note": df["VC_Note"][i],
-        "vc_reason": df["VC_Reason"][i] if type(df["VC"]).__name__ == "str" else None,
-        "vc_total": round(float(str(df["VC_Total"][i]).replace("$", "").replace(",", "")), 2) if type(df["VC_Total"][i]).__name__ == "str" else 0.0,
+        "vc_reason": df["VC_Reason"][i]
+        if type(df["VC"]).__name__ == "str"
+        else None,
+        "vc_total": round(
+            float(str(df["VC_Total"][i]).replace("$", "").replace(",", "")), 2
+        )
+        if type(df["VC_Total"][i]).__name__ == "str"
+        else 0.0,
         "check_id": int(df["Check_Number"][i]),
         "check_id_temp": int(df["Check_Number"][i]),
-        "course_type": df["Course"][i]
+        "course_type": df["Course"][i],
+        "account_id": account_id
     }
     items.append(item)
     count = count + 1
@@ -227,30 +315,46 @@ finally:
     try:
         try:
             for check in checks:
-                check["check_id"] = insert_check(check)
-                searchChecks(check["check_id_temp"], check["timestamp"], "", 2, check["check_id"])
+                check["check_id"] = insert_check(check, cur)
+                searchChecks(
+                    check["check_id_temp"],
+                    check["timestamp"],
+                    "",
+                    2,
+                    check["check_id"],
+                )
                 checksInsertedCount = checksInsertedCount + 1
                 print("checksInsertedCount: ", checksInsertedCount)
         except Exception as error:
-            print("CHECK ERROR: ", check) 
+            print("CHECK ERROR: ", check)
             raise error
 
         try:
             for course in courses:
-                check = searchChecks(course["check_id_temp"], course["timestamp"], "", 0, "")
+                check = searchChecks(
+                    course["check_id_temp"], course["timestamp"], "", 0, ""
+                )
                 course["check_id"] = check["check_id"]
-                course_id = insert_course(course)
-                searchCourses(course["check_id_temp"], course["timestamp"], course["course_type"], "", 2, course_id)
+                course_id = insert_course(course, cur)
+                searchCourses(
+                    course["check_id_temp"],
+                    course["timestamp"],
+                    course["course_type"],
+                    "",
+                    2,
+                    course_id,
+                )
                 coursesInsertedCount = coursesInsertedCount + 1
                 print("coursesInsertedCount: ", coursesInsertedCount)
         except Exception as error:
-            print("COURSE ERROR: ", course) 
+            print("COURSE ERROR: ", course)
             raise error
 
         try:
             setItemIds()
-            execute_values(cur,
-            """INSERT INTO items (item,
+            execute_values(
+                cur,
+                """INSERT INTO items (item,
             gross,
             tax,
             timestamp,
@@ -260,8 +364,10 @@ finally:
             vc_reason,
             vc_total,
             check_id,
-            course_id) VALUES %s""",
-            items)
+            course_id,
+            account_id) VALUES %s""",
+                items,
+            )
 
         except Exception as error:
             print("ITEM ERROR: ", item)

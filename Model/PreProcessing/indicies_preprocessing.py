@@ -1,4 +1,7 @@
 import os, sys
+sys.path.append(
+    "/Users/jerome/Documents/NYU/Capstone/DashOfData/Model/Models"
+)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append("Model/Models")
 from lags import lags
