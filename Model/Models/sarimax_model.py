@@ -3,10 +3,9 @@
 #    start_date: YYYY-M-D - Start of date range used to train/test data,
 #    end_date: YYYY-M-D - End of date range used to train/test data,
 #    split: Numeric - training/test split decimal ex 0.7,
+#    account_id: Integer - account_id of the business the model is being run on),
 #    plot: Boolean - Should a graph of the results be plotted?,
-#    save: Boolean - Should the results be saved?,
-#    account_id: Integer - account_id of the business the model is being run on)
-
+#    save: Boolean - Should the results be saved?
 
 def train_test_split(data, n_test):
     return data[:-n_test], data[-n_test:]
@@ -18,9 +17,9 @@ def sarimax_model(
     start_date,
     end_date,
     n_test,
-    plot,
-    save,
     account_id,
+    plot,
+    save
 ):
     import os
     import sys
