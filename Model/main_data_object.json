@@ -1,0 +1,32 @@
+{
+    "timestamp": "1-1-2015",
+    "check_count": 20,
+    "customer_count": 40,
+    "total_sales": 4000,
+    
+    "weather_condition": 1,
+    "ave_temp": 70,
+    "ave_humidity": 50,
+
+    "indicies": [
+        {
+            "timestamp": "1-1-2015",
+            "index_name": "BLAH",
+            "symbol": "XYZ",
+            "close": 40.50
+        },
+        {
+            "index_name": "JHEDBV",
+            "symbol": "ABC",
+            "close": 120.03
+        }
+    ],
+    "restaurant_searchs_week0": 4078,
+    "restaurant_searchs_week1": 5000,
+    "restaurant_searchs_week2": 3500,
+
+
+    "music_event": 3,
+    "sporting_event": 2,
+    "conference_event": 1
+}

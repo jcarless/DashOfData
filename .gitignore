@@ -112,3 +112,11 @@ virt/
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+#creds
+Model/creds.py
+Model/database.ini
+
+*.xlsx
+*.csv
+Model/database.ini
