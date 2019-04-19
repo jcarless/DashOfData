@@ -1,16 +1,22 @@
 #holtwinter_model(
 #   target_variable: DataFrame containing a series of the variable to be predicted, 
-#    split: numeric training/test split decimal ex 0.7
+#   split: numeric training/test split decimal ex 0.7
 #   plot: boolean Should a graph of the results be plotted?)
 
 def train_test_split(data, n_test):
 	return data[:-n_test], data[-n_test:]
 
-def holtwinter_model(target_variable, n_test, plot):
+def holtwinter_model(target_variable, 
+                     n_test, 
+                     account_id, 
+                     plot, 
+                     save):
+    
     from statsmodels.tsa.api import ExponentialSmoothing
     from sklearn.metrics import mean_squared_error
     from math import sqrt
     import numpy as np
+    from save_forecast import save_forecast
     
     #Split target variable into training/test set
     train, test = train_test_split(target_variable, n_test)
@@ -30,7 +36,7 @@ def holtwinter_model(target_variable, n_test, plot):
     rms = sqrt(mean_squared_error(test[test.columns[0]], y_hat_avg.Holt_Winter))
     
     #Plot results
-    if(plot == True):
+    if plot is True:
         import matplotlib.pyplot as plt
         plt.figure(figsize=(16,8))
         #plt.plot(train[train.columns[0]], label='dod_model.Train')
@@ -38,5 +44,12 @@ def holtwinter_model(target_variable, n_test, plot):
         plt.plot(y_hat_avg['Holt_Winter'], label='Holt_Winter')
         plt.legend(loc='best')
         plt.show()
+        
+    #save forecast
+    if save is True:
+        save_forecast(y_hat_avg["Holt_Winter"], 
+                      target_variable.columns[0], 
+                      "holtwinter", 
+                      account_id)
     
     return {"rms": rms, "summary": fit1.summary()}

@@ -33,7 +33,7 @@ def sarimax_model(
     from sarimax_parameter_query import get_params
     from save_forecast import save_forecast
 
-    #    Split target variable into training/test set
+    # Split target variable into training/test set
     train, test = train_test_split(target_variable, n_test)
 
     exog_variables_train = []
@@ -71,7 +71,7 @@ def sarimax_model(
         exog=exog_test, start=start_date, end=end_date, dynamic=False
     )
 
-    if plot == True:
+    if plot is True:
         import matplotlib.pyplot as plt
 
         plt.figure(figsize=(16, 8))
@@ -90,14 +90,19 @@ def sarimax_model(
         mean_squared_error(test[test.columns[0]], y_hat_avg.SARIMA)
     )
     #    rmse_train = sqrt(mean_squared_error(train[train.columns[0]], y_hat_avg.SARIMA))
-
+    
     # save forecast
     if save is True:
-        save_forecast(y_hat_avg["SARIMA"], "sarimax", account_id, parameter_id)
+        save_forecast(y_hat_avg["SARIMA"], 
+                      target_variable.columns[0], 
+                      "sarimax", 
+                      account_id, 
+                      parameter_id)
 
     return {
         "rmse_test": rmse_test,
         "rmse_train": "",
         "fit": fit1,
+        "actual": test[test.columns[0]],
         "prediction": y_hat_avg["SARIMA"],
     }

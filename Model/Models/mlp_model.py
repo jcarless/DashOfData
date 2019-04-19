@@ -83,7 +83,7 @@ def walk_forward_validation(data, n_test, cfg):
 	return error
 
 # repeat evaluation of a config
-def repeat_evaluate(data, config, n_test, n_repeats=30):
+def repeat_evaluate(data, config, n_test, n_repeats=5):
 	# fit and evaluate the model n times
 	scores = [walk_forward_validation(data, n_test, config) for _ in range(n_repeats)]
 	return scores
@@ -96,3 +96,49 @@ def summarize_scores(name, scores):
 	# box and whisker plot
 	pyplot.boxplot(scores)
 	pyplot.show()
+    
+if __name__ == "__main__":
+    
+    import os
+    import sys
+    sys.path.append(
+        "/Users/jerome/Documents/NYU/Capstone/DashOfData/Model/PreProcessing"
+    )
+    sys.path.append("Model/PreProcessing")
+    sys.path.append("Model/Models")
+    
+    import pandas as pd
+    from posData_preprocessing import get_posData
+    
+    # NY
+    account_id = 1
+    city_id = 5128581
+    start_date = '2014-03-01'
+    end_date = '2018-05-01'
+    
+#    # CT
+#    account_id = 2
+#    city_id = 4843564
+#    start_date = '2018-01-02'
+#    end_date = '2019-01-30'
+    
+    posData = get_posData(account_id, start_date, end_date)
+
+    
+    # Target variable
+    target_variable = pd.DataFrame(posData.guests_log_diff)
+    
+    # define config
+#    n_input, n_nodes, n_epochs, n_batch
+    config = [7, 500, 100, 100]
+    
+    # days to forecast
+    n_test = 7
+    
+    # grid search
+    scores = repeat_evaluate(target_variable, config, n_test)
+    
+    ## summarize scores
+    summarize_scores('mlp', scores)
+    
+    
