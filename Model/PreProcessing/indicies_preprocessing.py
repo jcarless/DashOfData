@@ -110,27 +110,27 @@ def get_marketData(start_date='2014-01-02',
     
        quotes.append(df)
     
-#    for i in range(0, len(quotes)):
-#        fund = quotes[i]
-#        name = fund["symbol"][0]
-#        fund[f'{name}_close_diff'] = fund['close'] - fund['close'].shift(7)
-#        fund[f'{name}_close_diff'].fillna(0, inplace=True)
-#        
-#        lag = lags(fund, name)
-#        lag7 = lag[f'{name}_close_lag_7'].copy()
-#        
-#        fund[f'{name}_close_diff_lag7'] = lag7 - lag7.shift(7)
-#        fund[f'{name}_close_diff_lag7'].fillna(0, inplace=True)
+    for i in range(0, len(quotes)):
+        fund = quotes[i]
+        name = fund["symbol"][0]
+        fund[f'{name}_close_diff'] = fund['close'] - fund['close'].shift(7)
+        fund[f'{name}_close_diff'].fillna(0, inplace=True)
+        
+        lag = lags(fund, name)
+        lag7 = lag[f'{name}_close_lag_7'].copy()
+        
+        fund[f'{name}_close_diff_lag7'] = lag7 - lag7.shift(7)
+        fund[f'{name}_close_diff_lag7'].fillna(0, inplace=True)
         
         
-    IYK = quotes[0].copy()
-    RHS = quotes[1].copy()
-    FSTA = quotes[2].copy()
-    VDC = quotes[3].copy()
-    PBJ = quotes[4].copy()
-    XLY = quotes[5].copy()
-    FXG = quotes[6].copy() 
-    QQQ = quotes[7].copy() 
+#    IYK = quotes[0].copy()
+#    RHS = quotes[1].copy()
+#    FSTA = quotes[2].copy()
+#    VDC = quotes[3].copy()
+#    PBJ = quotes[4].copy()
+#    XLY = quotes[5].copy()
+#    FXG = quotes[6].copy() 
+#    QQQ = quotes[7].copy() 
     
     return quotes
     

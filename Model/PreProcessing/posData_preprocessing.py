@@ -40,6 +40,12 @@ def get_posData(account_id, start_date, end_date):
         7
     ).fillna(0)
     
+    posData["guests_squared"] = np.square(posData["guests"])
+    
+    # Process sales
+    posData["total_sales"] = posData["total_sales"].astype("float")
+
+    
     missingDates = pd.date_range(start=start_date, end=end_date).difference(
         posData.index
     )
@@ -60,16 +66,16 @@ def get_pos_timeseries(account_id, start_date, end_date):
 
     sql = f"""
         SELECT 
-        DATE("timestamp") AS "date",
+        DATE("dining_date") AS "date",
         SUM("guests") AS "guests",
         SUM("total") AS "total_sales",
         COUNT(distinct "check_id") AS "check_count"
         
         FROM checks
-        WHERE DATE("timestamp") BETWEEN '{start_date}' AND '{end_date}'
+        WHERE DATE("dining_date") BETWEEN '{start_date}' AND '{end_date}'
         AND account_id = {account_id}
         
-        GROUP BY DATE("timestamp")
+        GROUP BY DATE("dining_date")
         ORDER BY "date" ASC
         """
     try:
@@ -81,8 +87,8 @@ def get_pos_timeseries(account_id, start_date, end_date):
         return daily_timeseries
 
     except (Exception, psycopg2.DatabaseError) as error:
-        print("get_checks error: ", error)
         db_close(conn)
+        raise error
 
 if __name__ == "__main__":
     posData = get_posData(1, '2018-02-01', '2018-05-01')

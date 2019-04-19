@@ -30,7 +30,11 @@ def lags(df, name):
     df=df.iloc[max_multiple:]
     
     df = pd.concat([df[df.columns[2]], df[df.columns[27:38]]], axis=1)
-    return df.astype("float")
+    
+    try:
+        return df.astype("float")
+    except:
+        return df
 
 if __name__ == "__main__":
     import sys
