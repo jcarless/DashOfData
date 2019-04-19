@@ -28,6 +28,7 @@ def get_weatherData(city_id, start_date, end_date):
     weatherData.temp.fillna(method="bfill", limit=5, inplace=True)
     
     weatherData["temp_diff"] = weatherData.temp - weatherData.temp.shift(7).fillna(0)
+    weatherData["temp_diff"] = weatherData["temp_diff"].astype("float")
     
     weatherData["temp_diff_percent"] = (
         (weatherData.temp - weatherData.temp.shift(7))
