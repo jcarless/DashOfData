@@ -10,6 +10,7 @@ from posData_preprocessing import get_posData
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from statsmodels.tsa.api import Holt
 
 # # NY
 # account_id = 1
@@ -37,19 +38,20 @@ n_test = 7
 # Split target variable into training/test set
 train, test = train_test_split(target_variable, n_test)
 
-#Model 4
-from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing
+#Model 6
 y_hat_avg = test.copy()
-fit2 = SimpleExpSmoothing(np.asarray(train['guests'])).fit(smoothing_level=0.6,optimized=False)
-y_hat_avg['SES'] = fit2.forecast(len(test))
+
+fit1 = Holt(np.asarray(train['guests'])).fit(smoothing_level = 0.3,smoothing_slope = 0.1)
+y_hat_avg['Holt_linear'] = fit1.forecast(len(test))
+
 plt.figure(figsize=(16,8))
 plt.plot(test['guests'], label='Test')
-plt.plot(y_hat_avg['SES'], label='SES')
-plt.title("CT Exponential Smoothing")
+plt.plot(y_hat_avg['Holt_linear'], label='Holt_linear')
+plt.title("CT Holt's Linear Trend")
 plt.legend(loc='best')
 plt.show()
 
 from sklearn.metrics import mean_squared_error
 from math import sqrt
-rms = sqrt(mean_squared_error(test.guests, y_hat_avg.SES))
+rms = sqrt(mean_squared_error(test.guests, y_hat_avg.Holt_linear))
 print(rms)
