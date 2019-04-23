@@ -11,17 +11,17 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# NY
-account_id = 1
-city_id = 5128581
-start_date = '2014-03-01'
-end_date = '2018-05-01'
+# # NY
+# account_id = 1
+# city_id = 5128581
+# start_date = '2014-03-01'
+# end_date = '2018-05-01'
 
-## CT
-#account_id = 2
-#city_id = 4843564
-#start_date = '2018-01-02'
-#end_date = '2019-01-30'
+# CT
+account_id = 2
+city_id = 4843564
+start_date = '2018-01-02'
+end_date = '2019-01-30'
 
 posData = get_posData(account_id, start_date, end_date)
 
@@ -42,11 +42,10 @@ dd= np.asarray(train.guests)
 y_hat = test.copy()
 y_hat['naive'] = dd[len(dd)-1]
 plt.figure(figsize=(12,8))
-# plt.plot(train.index, train['guests'], label='Train')
 plt.plot(test.index,test['guests'], label='Test')
 plt.plot(y_hat.index,y_hat['naive'], label='Naive Forecast')
 plt.legend(loc='best')
-plt.title("Naive Forecast")
+plt.title("CT Naive Forecast")
 plt.show()
 
 from sklearn.metrics import mean_squared_error
